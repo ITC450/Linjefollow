@@ -8,16 +8,26 @@
 using namespace std;
 using namespace cv;
 
-void pre_proc(Mat mat){
+int mat_rows(Mat mat){
   int rows = mat.rows;
-  int cols = mat.cols;
-
   Size s = mat.size();
-
   rows = s.height;
-  cols = s.width;
   std::cout << rows << '\n';
+  return rows;
+}
+int mat_cols(Mat mat){
+  int cols = mat.cols;
+  Size s = mat.size();
+  cols = s.width;
   std::cout << cols << '\n';
+  return cols;
+}
+
+Mat pre_proc(Mat mat, int x_akse, int y_akse){
+  Rect firkant = Rect(0,x_akse/2,y_akse,x_akse/2);
+  //Rect firkant = Rect(1,1,1,1);
+  Mat Bund = mat(firkant);
+  return Bund;
 }
 
 int main()
@@ -28,10 +38,10 @@ int main()
                 return -1;
         }
 
-
         Mat cameraFrame;
         stream1 >> cameraFrame;
-        pre_proc(cameraFrame);
+        int rows=mat_rows(cameraFrame);
+        int cols=mat_cols(cameraFrame);
 
         Mat cvt;
         Mat blur;
@@ -48,7 +58,9 @@ int main()
                         break;
                 }
 
-                cvtColor(cameraFrame, cvt, CV_BGR2GRAY);
+                Mat Bund = pre_proc(cameraFrame, rows, cols);
+
+                cvtColor(Bund, cvt, CV_BGR2GRAY);
                 GaussianBlur(cvt, blur,Size(9,9),2,2);
                 //Canny( blur, thres, 100, 100*2, 3 );
                 threshold(blur, thres,70,255,THRESH_BINARY_INV);
@@ -64,13 +76,13 @@ int main()
 
                 for(auto i = 0; i < contours.size(); i++ )
                 {
-                        drawContours( cameraFrame, contours, i, Scalar(178,102,255), 2, 8, hierarchy, 0, Point() );
-                        circle( cameraFrame, mc[i], 4, Scalar(0,255,255), -1, 8, 0 );
+                        drawContours( Bund, contours, i, Scalar(178,102,255), 2, 8, hierarchy, 0, Point() );
+                        circle( Bund, mc[i], 4, Scalar(0,255,255), -1, 8, 0 );
                 }
-
+                rectangle( cameraFrame,Point(0,rows/2),Point(cols,rows/2),Scalar( 0, 0, 255 ),1,8 );
                 namedWindow( "Frame", CV_WINDOW_AUTOSIZE );
-                imshow("Threshold", thres);
                 imshow("Frame", cameraFrame);
+                imshow("Threshold", thres);
                 waitKey(1);
         }
         return 0;
