@@ -47,7 +47,6 @@ int main()
         for( int i = 0; i < contours.size(); i++ )
         { mc[i] = Point2f( mu[i].m10/mu[i].m00 , mu[i].m01/mu[i].m00 ); }
 
-        Mat drawing = Mat::zeros( thres.size(), CV_8UC3 );
         for(auto i = 0; i < contours.size(); i++ )
         {
             drawContours( cameraFrame, contours, i, Scalar(178,102,255), 2, 8, hierarchy, 0, Point() );
