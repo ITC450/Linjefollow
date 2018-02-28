@@ -23,9 +23,13 @@ int mat_cols(Mat mat){
   return cols;
 }
 
-Mat pre_proc(Mat mat, int x_akse, int y_akse){
+Mat pre_proc(Mat mat, int y_akse, int x_akse){
+  Rect firkant = Rect(0,y_akse/2,x_akse,y_akse/2);
+  Mat Bund = mat(firkant);
+  return Bund;
+}
+Mat pre_proc2(Mat mat, int x_akse, int y_akse){
   Rect firkant = Rect(0,x_akse/2,y_akse,x_akse/2);
-  //Rect firkant = Rect(1,1,1,1);
   Mat Bund = mat(firkant);
   return Bund;
 }
@@ -59,6 +63,7 @@ int main()
                 }
 
                 Mat Bund = pre_proc(cameraFrame, rows, cols);
+                Mat Bund2 = pre_proc2(cameraFrame, rows, cols);
 
                 cvtColor(Bund, cvt, CV_BGR2GRAY);
                 GaussianBlur(cvt, blur,Size(9,9),2,2);
