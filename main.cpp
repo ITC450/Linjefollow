@@ -64,14 +64,14 @@ vector<Point2f> find_line(Mat cameraFrame){
 
     //Top slice
     cvtColor(Bund, cvt, CV_BGR2GRAY);
-    GaussianBlur(cvt, blur,Size(9,9),2,2);
+    GaussianBlur(cvt, blur,Size(5,5),0,0);
     //Canny( blur, thres, 100, 100*2, 3 );
     threshold(blur, thres,70,255,THRESH_BINARY_INV);
     findContours(thres,contours, hierarchy,1,CHAIN_APPROX_NONE);
 
     //Bottom slice
     cvtColor(Bund2, cvt2, CV_BGR2GRAY);
-    GaussianBlur(cvt2, blur2,Size(9,9),2,2);
+    GaussianBlur(cvt2, blur2,Size(5,5),0,0);
     //Canny( blur2, thres2, 100, 100*2, 3 );
     threshold(blur2, thres2,70,255,THRESH_BINARY_INV);
     findContours(thres2,contours2, hierarchy2,1,CHAIN_APPROX_NONE);
