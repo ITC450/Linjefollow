@@ -79,10 +79,10 @@ int main()
                         drawContours( Bund, contours, i, Scalar(178,102,255), 2, 8, hierarchy, 0, Point() );
                         circle( Bund, mc[i], 4, Scalar(0,255,255), -1, 8, 0 );
                 }
-                rectangle( cameraFrame,Point(0,rows/2),Point(cols,rows/2),Scalar( 0, 0, 255 ),1,8 );
+                rectangle( cameraFrame,Point(0,rows/2),Point(cols-1,rows-1),Scalar( 0, 0, 255 ),1);
                 namedWindow( "Frame", CV_WINDOW_AUTOSIZE );
                 imshow("Frame", cameraFrame);
-                imshow("Threshold", thres);
+                //imshow("Threshold", thres);
                 waitKey(1);
         }
         return 0;
