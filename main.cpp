@@ -34,7 +34,8 @@ Mat pre_proc2(Mat mat, int y_akse, int x_akse){
     return Bund;
 }
 
-void find_line(Mat cameraFrame){
+vector<Point2f> find_line(Mat cameraFrame){
+    vector<Point2f> center_points;
     int rows=mat_rows(cameraFrame);
     int cols=mat_cols(cameraFrame);
 
@@ -111,6 +112,9 @@ void find_line(Mat cameraFrame){
     Point2f mc2;
     mc2 = Point2f( mu2.m10/mu2.m00, mu2.m01/mu2.m00 );
 
+    center_points.push_back(mc);
+    center_points.push_back(mc2);
+
     //Top slice
     drawContours( Bund, contours, largest_contour_index, Scalar(255,0,0), 2, 8, hierarchy, 0, Point() );
     circle( Bund, mc, 4, Scalar(0,255,255), -1, 8, 0 );
@@ -125,10 +129,8 @@ void find_line(Mat cameraFrame){
     rectangle( cameraFrame,Point(0,rows/2),Point(cols-1,rows-1),Scalar( 0, 255, 0 ),1);
     rectangle( cameraFrame,Point(0,rows*0.75),Point(cols-1,rows-1),Scalar( 0, 255, 0 ),1);
 
-    //Window
-    namedWindow( "Frame", CV_WINDOW_AUTOSIZE );
-    imshow("Frame", cameraFrame);
-    //imshow("Threshold", thres);
+    return center_points;
+
 }
 
 int main()
@@ -149,7 +151,13 @@ int main()
             std::cerr<<"the frame is empty"<<std::endl;
             break;
         }
-        find_line(cameraFrame);
+        vector<Point2f>center_points=find_line(cameraFrame);
+        //std::cout << center_points << '\n';
+
+        //Window
+        namedWindow( "Frame", CV_WINDOW_AUTOSIZE );
+        imshow("Frame", cameraFrame);
+        //imshow("Threshold", thres);
 
         waitKey(1);
     }
