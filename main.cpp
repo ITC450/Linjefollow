@@ -34,49 +34,33 @@ Mat pre_proc2(Mat mat, int y_akse, int x_akse){
     return Bund;
 }
 
-vector<Point2f> find_line(Mat cameraFrame){
-    vector<Point2f> center_points;
-    int rows=mat_rows(cameraFrame);
-    int cols=mat_cols(cameraFrame);
+Point2f find_point1(Mat cameraFrame,int rows,int cols){
+    Point2f point;
 
-    //Top slice
+    //Mats and containers
     Mat cvt;
     Mat blur;
     Mat thres;
     vector<vector<Point> > contours;
     vector<Vec4i> hierarchy;
-
-    //Bottom slice
-    Mat cvt2;
-    Mat blur2;
-    Mat thres2;
-    vector<vector<Point> > contours2;
-    vector<Vec4i> hierarchy2;
+    int largest_area=0;
+    int largest_contour_index=0;
 
     //Top slice
     Mat Bund = pre_proc(cameraFrame, rows, cols);
-    int largest_area=0;
-    int largest_contour_index=0;
-    //Bottom slice
-    Mat Bund2 = pre_proc2(cameraFrame, rows, cols);
-    int largest_area2=0;
-    int largest_contour_index2=0;
 
-    //Top slice
+    //Masks and find contours
     cvtColor(Bund, cvt, CV_BGR2GRAY);
     GaussianBlur(cvt, blur,Size(5,5),0,0);
-    //Canny( blur, thres, 100, 100*2, 3 );
     threshold(blur, thres,70,255,THRESH_BINARY_INV);
     findContours(thres,contours, hierarchy,1,CHAIN_APPROX_NONE);
 
-    //Bottom slice
-    cvtColor(Bund2, cvt2, CV_BGR2GRAY);
-    GaussianBlur(cvt2, blur2,Size(5,5),0,0);
-    //Canny( blur2, thres2, 100, 100*2, 3 );
-    threshold(blur2, thres2,70,255,THRESH_BINARY_INV);
-    findContours(thres2,contours2, hierarchy2,1,CHAIN_APPROX_NONE);
+    //Check if no contours
+    if (contours.empty()){
+        return Point2f (-1.0f,-1.0f);
+    }
 
-    //Top slice
+    //Find largest contour
     for( int i = 0; i< contours.size(); i++ ) // iterate through each contour.
     {
         double a = contourArea(contours[i], false);  //  Find the area of contour
@@ -86,7 +70,49 @@ vector<Point2f> find_line(Mat cameraFrame){
         }
     }
 
+    //Find center of mass(area)
+    Moments mu;
+    mu = moments( contours[largest_contour_index], false );
+
+    Point2f mc;
+    mc = Point2f( mu.m10/mu.m00, mu.m01/mu.m00 );
+
+    point=mc;
+
+    //Draw the center and contour outline
+    drawContours( Bund, contours, largest_contour_index, Scalar(255,0,0), 2, 8, hierarchy, 0, Point() );
+    circle( Bund, mc, 4, Scalar(0,255,255), -1, 8, 0 );
+
+    return point;
+}
+
+Point2f find_point2(Mat cameraFrame,int rows,int cols){
+    Point2f point;
+
+    //Mats and containers
+    Mat cvt2;
+    Mat blur2;
+    Mat thres2;
+    vector<vector<Point> > contours2;
+    vector<Vec4i> hierarchy2;
+    int largest_area2=0;
+    int largest_contour_index2=0;
+
     //Bottom slice
+    Mat Bund2 = pre_proc2(cameraFrame, rows, cols);
+
+    //Masks and find contours
+    cvtColor(Bund2, cvt2, CV_BGR2GRAY);
+    GaussianBlur(cvt2, blur2,Size(5,5),0,0);
+    threshold(blur2, thres2,70,255,THRESH_BINARY_INV);
+    findContours(thres2,contours2, hierarchy2,1,CHAIN_APPROX_NONE);
+
+    //Check if no contours
+    if (contours2.empty()){
+        return Point2f (-1.0f,-1.0f);
+    }
+
+    //Find largest contour
     for( int i = 0; i< contours2.size(); i++ ) // iterate through each contour.
     {
         double a = contourArea(contours2[i], false);  //  Find the area of contour
@@ -96,74 +122,68 @@ vector<Point2f> find_line(Mat cameraFrame){
         }
     }
 
-
-
-    //Top slice
-    Moments mu;
-    mu = moments( contours[largest_contour_index], false );
-
-    Point2f mc;
-    mc = Point2f( mu.m10/mu.m00, mu.m01/mu.m00 );
-
-    //Bottom slice
+    //Find center of mass(area)
     Moments mu2;
     mu2 = moments( contours2[largest_contour_index2], false );
 
     Point2f mc2;
     mc2 = Point2f( mu2.m10/mu2.m00, mu2.m01/mu2.m00 );
 
-    center_points.push_back(mc);
-    center_points.push_back(mc2);
+    point=mc2;
 
-    //Top slice
-    drawContours( Bund, contours, largest_contour_index, Scalar(255,0,0), 2, 8, hierarchy, 0, Point() );
-    circle( Bund, mc, 4, Scalar(0,255,255), -1, 8, 0 );
-
-    //Bottom slice
+    //Draw the center and contour outline
     drawContours( Bund2, contours2, largest_contour_index2, Scalar(255,0,0), 2, 8, hierarchy2, 0, Point() );
     circle( Bund2, mc2, 4, Scalar(0,255,255), -1, 8, 0 );
 
-    //Show whole frame with all lower half parts
-    Point2f line_offset(0.0f,float(rows/4));
-    arrowedLine(cameraFrame, mc2+line_offset*3, mc+line_offset*2, Scalar(0,0,255), 2, 8, 0);
-    rectangle( cameraFrame,Point(0,rows/2),Point(cols-1,rows-1),Scalar( 0, 255, 0 ),1);
-    rectangle( cameraFrame,Point(0,rows*0.75),Point(cols-1,rows-1),Scalar( 0, 255, 0 ),1);
-
-    return center_points;
-
+    return point;
 }
 
 int main()
 {
+    //Video from camera
     VideoCapture stream1(0);
     if(!stream1.isOpened()) {
         std::cerr << "cannot open camera" << std::endl;
         return -1;
     }
 
+    //Setup mat for source frame and insert feed into mat
     Mat cameraFrame;
     stream1 >> cameraFrame;
-
+    //Gets the resolution of the feed
+    int rows=mat_rows(cameraFrame);
+    int cols=mat_cols(cameraFrame);
 
     while (true) {
+        //Insert feed into frame mat
         stream1 >> cameraFrame;
+        //Check if feed has stopped
         if(cameraFrame.empty()) {
             std::cerr<<"the frame is empty"<<std::endl;
             break;
         }
-        vector<Point2f>center_points=find_line(cameraFrame);
-        //std::cout << center_points << '\n';
+        //Find to center points in the lower half of the frame
+        Point2f center_point1=find_point1(cameraFrame, rows, cols);
+        Point2f center_point2=find_point2(cameraFrame, rows, cols);
+        //std::cout << center_point1 << '\n';
+        //std::cout << center_point2 << '\n';
 
-        //Window
+        //UI, bottom half
+        rectangle( cameraFrame,Point(0,rows/2),Point(cols-1,rows-1),Scalar( 0, 255, 0 ),1);
+        rectangle( cameraFrame,Point(0,rows*0.75),Point(cols-1,rows-1),Scalar( 0, 255, 0 ),1);
+        //arrowedLine(cameraFrame, mc2+line_offset*3, mc+line_offset*2, Scalar(0,0,255), 2, 8, 0);
+
+        //Show the image/frame
         namedWindow( "Frame", CV_WINDOW_AUTOSIZE );
         imshow("Frame", cameraFrame);
         //imshow("Threshold", thres);
 
+        //Esc to close
         char c=(char)waitKey(1);
         if(c==27)
             break;
     }
-
+    //Clean up
     stream1.release();
     destroyAllWindows();
     return 0;
