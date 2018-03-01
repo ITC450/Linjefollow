@@ -159,7 +159,12 @@ int main()
         imshow("Frame", cameraFrame);
         //imshow("Threshold", thres);
 
-        waitKey(1);
+        char c=(char)waitKey(1);
+    if(c==27)
+      break;
     }
+
+    stream1.release();
+    destroyAllWindows();
     return 0;
 }

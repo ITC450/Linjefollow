@@ -3,4 +3,10 @@ cmake-build-debug/
 
 \.idea/
 
+main/
+
+prog/
+
 main
+
+prog
