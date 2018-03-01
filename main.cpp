@@ -160,8 +160,8 @@ int main()
         //imshow("Threshold", thres);
 
         char c=(char)waitKey(1);
-    if(c==27)
-      break;
+        if(c==27)
+            break;
     }
 
     stream1.release();
