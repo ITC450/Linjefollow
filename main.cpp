@@ -168,6 +168,7 @@ int main()
     int rows=mat_rows(cameraFrame);
     int cols=mat_cols(cameraFrame);
 
+    //Fps counter setup
     time_t start, end;
     double sec;
     double fps;
