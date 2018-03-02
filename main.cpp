@@ -2,6 +2,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <iostream>
+#include <time.h>
 
 #include <opencv2/opencv.hpp>
 
@@ -138,6 +139,19 @@ Point2f find_point2(Mat cameraFrame,int rows,int cols){
     return point;
 }
 
+double fps_counter(int *counter, time_t *start, time_t *end, double old_fps){
+    double fps=old_fps;
+    if (*counter == 30) {
+        double sec;
+        time(&*end);
+        sec = difftime(*end, *start);
+        fps = 30 / sec;
+        time(&*start);
+        *counter = 0;
+    }
+    return fps;
+}
+
 int main()
 {
     //Video from camera
@@ -153,6 +167,12 @@ int main()
     //Gets the resolution of the feed
     int rows=mat_rows(cameraFrame);
     int cols=mat_cols(cameraFrame);
+
+    time_t start, end;
+    double sec;
+    double fps;
+    int counter;
+    time(&start);
 
     while (true) {
         //Insert feed into frame mat
@@ -174,7 +194,8 @@ int main()
         //arrowedLine(cameraFrame, mc2+line_offset*3, mc+line_offset*2, Scalar(0,0,255), 2, 8, 0);
 
         //Fps counter displayed as UI
-        double fps = stream1.get(CV_CAP_PROP_FPS);
+        counter++;
+        fps=fps_counter(&counter, &start, &end, fps);
         char str[10];
         sprintf(str,"%f FPS",fps);
         putText(cameraFrame, str,Point2f(1, 15),FONT_HERSHEY_SIMPLEX,0.5,(0,255,0));
