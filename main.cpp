@@ -139,7 +139,7 @@ Point2f find_point2(Mat cameraFrame,int rows,int cols){
     return point;
 }
 
-double fps_counter(int *counter, time_t *start, time_t *end, double old_fps){
+/*double fps_counter(int *counter, time_t *start, time_t *end, double old_fps){
     double fps=old_fps;
     if (*counter == 30) {
         double sec;
@@ -150,7 +150,7 @@ double fps_counter(int *counter, time_t *start, time_t *end, double old_fps){
         *counter = 0;
     }
     return fps;
-}
+}*/
 
 int main()
 {
@@ -169,11 +169,11 @@ int main()
     int cols=mat_cols(cameraFrame);
 
     //Fps counter setup
-    time_t start, end;
+  /*  time_t start, end;
     double sec;
     double fps;
     int counter;
-    time(&start);
+    time(&start);*/
 
     while (true) {
         //Insert feed into frame mat
@@ -195,12 +195,12 @@ int main()
         //arrowedLine(cameraFrame, mc2+line_offset*3, mc+line_offset*2, Scalar(0,0,255), 2, 8, 0);
 
         //Fps counter displayed as UI
-        counter++;
+       /* counter++;
         fps=fps_counter(&counter, &start, &end, fps);
         char str[10];
         sprintf(str,"%f FPS",fps);
         putText(cameraFrame, str,Point2f(1, 15),FONT_HERSHEY_SIMPLEX,0.5,(0,255,0));
-
+*/
         //Show the image/frame
         namedWindow( "Frame", CV_WINDOW_AUTOSIZE );
         imshow("Frame", cameraFrame);
