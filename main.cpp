@@ -24,12 +24,12 @@ int mat_cols(Mat mat){
 }
 
 Mat pre_proc(Mat mat, int y_akse, int x_akse){
-    Rect firkant = Rect(0,y_akse/2,x_akse,y_akse/4);
+    Rect firkant = Rect(0,y_akse*0.75,x_akse,y_akse/8);
     Mat Bund = mat(firkant);
     return Bund;
 }
 Mat pre_proc2(Mat mat, int y_akse, int x_akse){
-    Rect firkant = Rect(0,y_akse*(0.75),x_akse,y_akse/4-1);
+    Rect firkant = Rect(0,y_akse*(0.875),x_akse,y_akse/8);
     Mat Bund = mat(firkant);
     return Bund;
 }
@@ -169,9 +169,15 @@ int main()
         //std::cout << center_point2 << '\n';
 
         //UI, bottom half
-        rectangle( cameraFrame,Point(0,rows/2),Point(cols-1,rows-1),Scalar( 0, 255, 0 ),1);
         rectangle( cameraFrame,Point(0,rows*0.75),Point(cols-1,rows-1),Scalar( 0, 255, 0 ),1);
+        rectangle( cameraFrame,Point(0,rows*0.875),Point(cols-1,rows-1),Scalar( 0, 255, 0 ),1);
         //arrowedLine(cameraFrame, mc2+line_offset*3, mc+line_offset*2, Scalar(0,0,255), 2, 8, 0);
+
+        //Fps counter displayed as UI
+        double fps = stream1.get(CV_CAP_PROP_FPS);
+        char str[10];
+        sprintf(str,"%f FPS",fps);
+        putText(cameraFrame, str,Point2f(1, 15),FONT_HERSHEY_SIMPLEX,0.5,(0,255,0));
 
         //Show the image/frame
         namedWindow( "Frame", CV_WINDOW_AUTOSIZE );
