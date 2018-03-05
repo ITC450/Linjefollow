@@ -157,15 +157,18 @@ int find_point2(Mat cameraFrame,int rows,int cols){
 
 
 void MotorFollowLine(int err){
+double error = err * 0.5; 
+std::cout << error << "\n";
 
   if(err < 0){
     LeftMotor(FORWARD, speed);
-    RightMotor(FORWARD, speed + err * 0.1);
+    RightMotor(FORWARD, speed + int(abs(error)));
   }
   if(err > 0){
     RightMotor(FORWARD, speed);
-    LeftMotor(FORWARD, speed + err * 0.1);
-  }else{
+    LeftMotor(FORWARD, speed + int(abs(error)));
+  }
+  if(err == 0){
     RightMotor(FORWARD, speed);
     LeftMotor(FORWARD, speed);
   }
@@ -174,7 +177,7 @@ void MotorFollowLine(int err){
 int main()
 {
     MotorInit();
-    speed = 256;
+    speed = 50;
     //Video from camera
     VideoCapture stream1(0);
     if(!stream1.isOpened()) {
