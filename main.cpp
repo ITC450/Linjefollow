@@ -191,6 +191,7 @@ int main()
     //Gets the resolution of the feed
     int rows=mat_rows(cameraFrame);
     int cols=mat_cols(cameraFrame);
+    VideoWriter video("outcpp.avi",CV_FOURCC('M','J','P','G'),10, Size(cols,rows));
 
     //Fps counter setup
   /*  time_t start, end;
@@ -230,6 +231,7 @@ int main()
         //Show the image/frame
         namedWindow( "Frame", CV_WINDOW_AUTOSIZE );
         imshow("Frame", cameraFrame);
+        video.write(cameraFrame);
         //imshow("Threshold", thres);
 
         //Esc to close
