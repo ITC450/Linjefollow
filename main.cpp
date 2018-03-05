@@ -6,10 +6,11 @@
 
 #include <opencv2/opencv.hpp>
 
-//#include "motor.hpp"
+#include "motor.hpp"
 
 using namespace std;
 using namespace cv;
+int speed;
 
 int mat_rows(Mat mat){
     int rows = mat.rows;
@@ -153,8 +154,24 @@ int find_point2(Mat cameraFrame,int rows,int cols){
     return fps;
 }*/
 
+void MotorFollowLine(int err){
+
+  if(err < 0){
+    LeftMotor(FORWARD, speed);
+    RightMotor(FORWARD, speed + err * 0.1);
+  }
+  if(err > 0){
+    RightMotor(FORWARD, speed);
+    LeftMotor(FORWARD, speed + err * 0.1);
+  }else{
+    RightMotor(FORWARD, speed);
+    LeftMotor(FORWARD, speed);
+  }
+}
+
 int main()
 {
+    speed = 256;
     //Video from camera
     VideoCapture stream1(0);
     if(!stream1.isOpened()) {
