@@ -6,6 +6,8 @@
 
 #include <opencv2/opencv.hpp>
 
+//#include "motor.hpp"
+
 using namespace std;
 using namespace cv;
 
@@ -35,9 +37,8 @@ Mat pre_proc2(Mat mat, int y_akse, int x_akse){
     return Bund;
 }
 
-Point2f find_point1(Mat cameraFrame,int rows,int cols){
-    Point2f point;
-
+int find_point1(Mat cameraFrame,int rows,int cols){
+    int afvigelse;
     //Mats and containers
     Mat cvt;
     Mat blur;
@@ -58,7 +59,7 @@ Point2f find_point1(Mat cameraFrame,int rows,int cols){
 
     //Check if no contours
     if (contours.empty()){
-        return Point2f (-1.0f,-1.0f);
+        return -1;
     }
 
     //Find largest contour
@@ -78,17 +79,17 @@ Point2f find_point1(Mat cameraFrame,int rows,int cols){
     Point2f mc;
     mc = Point2f( mu.m10/mu.m00, mu.m01/mu.m00 );
 
-    point=mc;
+    afvigelse = mc.x-(cols/2);
 
     //Draw the center and contour outline
     drawContours( Bund, contours, largest_contour_index, Scalar(255,0,0), 2, 8, hierarchy, 0, Point() );
     circle( Bund, mc, 4, Scalar(0,255,255), -1, 8, 0 );
 
-    return point;
+    return afvigelse;
 }
 
-Point2f find_point2(Mat cameraFrame,int rows,int cols){
-    Point2f point;
+int find_point2(Mat cameraFrame,int rows,int cols){
+    int afvigelse;
 
     //Mats and containers
     Mat cvt2;
@@ -110,7 +111,7 @@ Point2f find_point2(Mat cameraFrame,int rows,int cols){
 
     //Check if no contours
     if (contours2.empty()){
-        return Point2f (-1.0f,-1.0f);
+        return -1;
     }
 
     //Find largest contour
@@ -130,13 +131,13 @@ Point2f find_point2(Mat cameraFrame,int rows,int cols){
     Point2f mc2;
     mc2 = Point2f( mu2.m10/mu2.m00, mu2.m01/mu2.m00 );
 
-    point=mc2;
+    afvigelse = mc2.x-(cols/2);
 
     //Draw the center and contour outline
     drawContours( Bund2, contours2, largest_contour_index2, Scalar(255,0,0), 2, 8, hierarchy2, 0, Point() );
     circle( Bund2, mc2, 4, Scalar(0,255,255), -1, 8, 0 );
 
-    return point;
+    return afvigelse;
 }
 
 /*double fps_counter(int *counter, time_t *start, time_t *end, double old_fps){
@@ -184,9 +185,9 @@ int main()
             break;
         }
         //Find to center points in the lower half of the frame
-        Point2f center_point1=find_point1(cameraFrame, rows, cols);
-        Point2f center_point2=find_point2(cameraFrame, rows, cols);
-        //std::cout << center_point1 << '\n';
+        int center_point1=find_point1(cameraFrame, rows, cols);
+        int center_point2=find_point2(cameraFrame, rows, cols);
+        //std::cout << center_point1 << ',';
         //std::cout << center_point2 << '\n';
 
         //UI, bottom half
