@@ -135,7 +135,7 @@ int find_point2(Mat cameraFrame,int rows,int cols){
     afvigelse = mc2.x-(cols/2);
 
     //Draw the center and contour outline
-    drawContours( Bund2, contours2, largest_contour_index2, Scalar(255,0,0), 2, 8, hierarchy2, 0, Point() );
+    //drawContours( Bund2, contours2, largest_contour_index2, Scalar(255,0,0), 2, 8, hierarchy2, 0, Point() );
     circle( Bund2, mc2, 4, Scalar(0,255,255), -1, 8, 0 );
 
     return afvigelse;
@@ -217,7 +217,7 @@ int main()
 
         //UI, bottom half
         //rectangle( cameraFrame,Point(0,rows*0.75),Point(cols-1,rows-1),Scalar( 0, 255, 0 ),1);
-        rectangle( cameraFrame,Point(0,rows*0.875),Point(cols-1,rows-1),Scalar( 0, 255, 0 ),1);
+        //rectangle( cameraFrame,Point(0,rows*0.875),Point(cols-1,rows-1),Scalar( 0, 255, 0 ),1);
         //arrowedLine(cameraFrame, mc2+line_offset*3, mc+line_offset*2, Scalar(0,0,255), 2, 8, 0);
 
         //Fps counter displayed as UI
