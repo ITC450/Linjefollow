@@ -154,6 +154,8 @@ int find_point2(Mat cameraFrame,int rows,int cols){
     return fps;
 }*/
 
+
+
 void MotorFollowLine(int err){
 
   if(err < 0){
@@ -171,6 +173,7 @@ void MotorFollowLine(int err){
 
 int main()
 {
+    MotorInit();
     speed = 256;
     //Video from camera
     VideoCapture stream1(0);
@@ -202,13 +205,15 @@ int main()
             break;
         }
         //Find to center points in the lower half of the frame
-        int center_point1=find_point1(cameraFrame, rows, cols);
-        int center_point2=find_point2(cameraFrame, rows, cols);
+        //MotorFollowLine(find_point1(cameraFrame, rows, cols));
+        //MotorFollowLine(find_point1(cameraFrame, rows, cols));
+        //int center_point2=find_point2(cameraFrame, rows, cols);
+        MotorFollowLine(find_point2(cameraFrame, rows, cols));
         //std::cout << center_point1 << ',';
         //std::cout << center_point2 << '\n';
 
         //UI, bottom half
-        rectangle( cameraFrame,Point(0,rows*0.75),Point(cols-1,rows-1),Scalar( 0, 255, 0 ),1);
+        //rectangle( cameraFrame,Point(0,rows*0.75),Point(cols-1,rows-1),Scalar( 0, 255, 0 ),1);
         rectangle( cameraFrame,Point(0,rows*0.875),Point(cols-1,rows-1),Scalar( 0, 255, 0 ),1);
         //arrowedLine(cameraFrame, mc2+line_offset*3, mc+line_offset*2, Scalar(0,0,255), 2, 8, 0);
 
