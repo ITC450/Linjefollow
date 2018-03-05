@@ -2,6 +2,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <iostream>
+#include <time.h>
 
 #include <opencv2/opencv.hpp>
 
@@ -24,12 +25,12 @@ int mat_cols(Mat mat){
 }
 
 Mat pre_proc(Mat mat, int y_akse, int x_akse){
-    Rect firkant = Rect(0,y_akse/2,x_akse,y_akse/4);
+    Rect firkant = Rect(0,y_akse*0.75,x_akse,y_akse/8);
     Mat Bund = mat(firkant);
     return Bund;
 }
 Mat pre_proc2(Mat mat, int y_akse, int x_akse){
-    Rect firkant = Rect(0,y_akse*(0.75),x_akse,y_akse/4-1);
+    Rect firkant = Rect(0,y_akse*(0.875),x_akse,y_akse/8);
     Mat Bund = mat(firkant);
     return Bund;
 }
@@ -138,6 +139,19 @@ Point2f find_point2(Mat cameraFrame,int rows,int cols){
     return point;
 }
 
+/*double fps_counter(int *counter, time_t *start, time_t *end, double old_fps){
+    double fps=old_fps;
+    if (*counter == 30) {
+        double sec;
+        time(&*end);
+        sec = difftime(*end, *start);
+        fps = 30 / sec;
+        time(&*start);
+        *counter = 0;
+    }
+    return fps;
+}*/
+
 int main()
 {
     //Video from camera
@@ -154,6 +168,13 @@ int main()
     int rows=mat_rows(cameraFrame);
     int cols=mat_cols(cameraFrame);
 
+    //Fps counter setup
+  /*  time_t start, end;
+    double sec;
+    double fps;
+    int counter;
+    time(&start);*/
+
     while (true) {
         //Insert feed into frame mat
         stream1 >> cameraFrame;
@@ -169,10 +190,17 @@ int main()
         //std::cout << center_point2 << '\n';
 
         //UI, bottom half
-        rectangle( cameraFrame,Point(0,rows/2),Point(cols-1,rows-1),Scalar( 0, 255, 0 ),1);
         rectangle( cameraFrame,Point(0,rows*0.75),Point(cols-1,rows-1),Scalar( 0, 255, 0 ),1);
+        rectangle( cameraFrame,Point(0,rows*0.875),Point(cols-1,rows-1),Scalar( 0, 255, 0 ),1);
         //arrowedLine(cameraFrame, mc2+line_offset*3, mc+line_offset*2, Scalar(0,0,255), 2, 8, 0);
 
+        //Fps counter displayed as UI
+       /* counter++;
+        fps=fps_counter(&counter, &start, &end, fps);
+        char str[10];
+        sprintf(str,"%f FPS",fps);
+        putText(cameraFrame, str,Point2f(1, 15),FONT_HERSHEY_SIMPLEX,0.5,(0,255,0));
+*/
         //Show the image/frame
         namedWindow( "Frame", CV_WINDOW_AUTOSIZE );
         imshow("Frame", cameraFrame);
