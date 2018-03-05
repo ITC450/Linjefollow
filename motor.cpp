@@ -1,4 +1,4 @@
-#include <motor.hpp>
+#include "motor.hpp"
 
 void MotorInit()
 {
@@ -33,11 +33,11 @@ void RightMotor(direction dir, int speed)
 {
   if (dir == BACK)
   {
-     digitalWrite(24,HIGH);
-     digitalWrite(25,LOW);
+     digitalWrite(25,HIGH);
+     digitalWrite(24,LOW);
   }else{
-    digitalWrite(24,LOW);
-    digitalWrite(25,HIGH);
+    digitalWrite(25,LOW);
+    digitalWrite(24,HIGH);
   }
   pwmWrite(23,speed);
 }

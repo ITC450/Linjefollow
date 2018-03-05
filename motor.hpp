@@ -3,7 +3,7 @@
 #include <wiringPi.h>
 #include <iostream>
 
-typedef enum direction {BACK , FORWARD};
+enum direction {BACK , FORWARD};
 
 void MotorInit();
 
