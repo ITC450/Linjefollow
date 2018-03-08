@@ -160,8 +160,7 @@ void MotorFollowLine(int err, Mat mat, int rows, int cols){
     }
 }
 
-int main()
-{
+int CV_motor_control(){
     MotorInit();
     speed = 50;
     //Video from camera
@@ -214,4 +213,9 @@ int main()
     stream1.release();
     destroyAllWindows();
     return 0;
+}
+
+int main()
+{
+    CV_motor_control();
 }
