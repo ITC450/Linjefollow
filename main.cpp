@@ -6,7 +6,8 @@
 
 #include <opencv2/opencv.hpp>
 
-#include "motor.hpp"
+//#include "motor.hpp"
+#include "motor_virt.hpp"
 
 using namespace std;
 using namespace cv;
@@ -141,37 +142,22 @@ int find_point2(Mat cameraFrame,int rows,int cols){
     return afvigelse;
 }
 
-/*double fps_counter(int *counter, time_t *start, time_t *end, double old_fps){
-    double fps=old_fps;
-    if (*counter == 30) {
-        double sec;
-        time(&*end);
-        sec = difftime(*end, *start);
-        fps = 30 / sec;
-        time(&*start);
-        *counter = 0;
+void MotorFollowLine(int err, Mat mat, int rows, int cols){
+    double error = err * 0.5;
+    //std::cout << error << "\n";
+
+    if(err < 0){
+        LeftMotor(FORWARD, speed, mat, rows, cols);
+        RightMotor(FORWARD, speed + int(abs(error))  , mat, rows, cols);
     }
-    return fps;
-}*/
-
-
-
-void MotorFollowLine(int err){
-double error = err * 0.5; 
-std::cout << error << "\n";
-
-  if(err < 0){
-    LeftMotor(FORWARD, speed);
-    RightMotor(FORWARD, speed + int(abs(error)));
-  }
-  if(err > 0){
-    RightMotor(FORWARD, speed);
-    LeftMotor(FORWARD, speed + int(abs(error)));
-  }
-  if(err == 0){
-    RightMotor(FORWARD, speed);
-    LeftMotor(FORWARD, speed);
-  }
+    if(err > 0){
+        RightMotor(FORWARD, speed, mat, rows, cols);
+        LeftMotor(FORWARD, speed + int(abs(error))  , mat, rows, cols);
+    }
+    if(err == 0){
+        RightMotor(FORWARD, speed, mat, rows, cols);
+        LeftMotor(FORWARD, speed, mat, rows, cols);
+    }
 }
 
 int main()
@@ -192,13 +178,6 @@ int main()
     int rows=mat_rows(cameraFrame);
     int cols=mat_cols(cameraFrame);
 
-    //Fps counter setup
-  /*  time_t start, end;
-    double sec;
-    double fps;
-    int counter;
-    time(&start);*/
-
     while (true) {
         //Insert feed into frame mat
         stream1 >> cameraFrame;
@@ -208,25 +187,16 @@ int main()
             break;
         }
         //Find to center points in the lower half of the frame
-        //MotorFollowLine(find_point1(cameraFrame, rows, cols));
-        //MotorFollowLine(find_point1(cameraFrame, rows, cols));
-        //int center_point2=find_point2(cameraFrame, rows, cols);
-        MotorFollowLine(find_point2(cameraFrame, rows, cols));
+        int center_point1=find_point1(cameraFrame, rows, cols);
+        int center_point2=find_point2(cameraFrame, rows, cols);
+        MotorFollowLine(center_point2, cameraFrame, rows, cols);
         //std::cout << center_point1 << ',';
         //std::cout << center_point2 << '\n';
 
         //UI, bottom half
-        //rectangle( cameraFrame,Point(0,rows*0.75),Point(cols-1,rows-1),Scalar( 0, 255, 0 ),1);
+        rectangle( cameraFrame,Point(0,rows*0.75),Point(cols-1,rows-1),Scalar( 0, 255, 0 ),1);
         rectangle( cameraFrame,Point(0,rows*0.875),Point(cols-1,rows-1),Scalar( 0, 255, 0 ),1);
-        //arrowedLine(cameraFrame, mc2+line_offset*3, mc+line_offset*2, Scalar(0,0,255), 2, 8, 0);
 
-        //Fps counter displayed as UI
-       /* counter++;
-        fps=fps_counter(&counter, &start, &end, fps);
-        char str[10];
-        sprintf(str,"%f FPS",fps);
-        putText(cameraFrame, str,Point2f(1, 15),FONT_HERSHEY_SIMPLEX,0.5,(0,255,0));
-*/
         //Show the image/frame
         namedWindow( "Frame", CV_WINDOW_AUTOSIZE );
         imshow("Frame", cameraFrame);
