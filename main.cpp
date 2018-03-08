@@ -179,6 +179,8 @@ int CV_motor_control(){
     cout << "Resolution: " << '\n';
     int rows=mat_rows(cameraFrame);
     int cols=mat_cols(cameraFrame);
+    //Save as  settings
+    VideoWriter video("linefollower.avi",CV_FOURCC('M','J','P','G'),30, Size(cols,rows));
 
     while (true) {
         //Insert feed into frame mat
@@ -202,6 +204,7 @@ int CV_motor_control(){
         //Show the image/frame
         namedWindow( "Frame", CV_WINDOW_AUTOSIZE );
         imshow("Frame", cameraFrame);
+        video.write(cameraFrame);
         //imshow("Threshold", thres);
 
         //Esc to close
