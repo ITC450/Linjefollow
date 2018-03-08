@@ -9,6 +9,7 @@ find_package( OpenCV REQUIRED )
 set(SOURCE_FILES main.cpp)
 
 add_executable(Linjefollow main.cpp motor_virt.cpp motor_virt.hpp)
+#add_executable(Linjefollow main.cpp motor_virt.cpp motor_virt.hpp motor.cpp motor.hpp)
 
 include_directories(${OpenCV_INCLUDE_DIRS})
 target_link_libraries( Linjefollow ${OpenCV_LIBS} )
