@@ -85,7 +85,7 @@ int find_point1(Mat cameraFrame,int rows,int cols){
 
     //Draw the center and contour outline
     drawContours( Bund, contours, largest_contour_index, Scalar(255,0,0), 2, 8, hierarchy, 0, Point() );
-    circle( Bund, mc, 4, Scalar(0,255,255), -1, 8, 0 );
+    circle( Bund, mc, 4, Scalar(0,255,255), 1, 8, 0 );
 
     return afvigelse;
 }
@@ -137,7 +137,7 @@ int find_point2(Mat cameraFrame,int rows,int cols){
 
     //Draw the center and contour outline
     drawContours( Bund2, contours2, largest_contour_index2, Scalar(255,0,0), 2, 8, hierarchy2, 0, Point() );
-    circle( Bund2, mc2, 4, Scalar(0,255,255), -1, 8, 0 );
+    circle( Bund2, mc2, 4, Scalar(0,255,255), 1, 8, 0 );
 
     return afvigelse;
 }
