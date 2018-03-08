@@ -17,14 +17,14 @@ int mat_rows(Mat mat){
     int rows = mat.rows;
     Size s = mat.size();
     rows = s.height;
-    //std::cout << rows << '\n';
+    cout << rows << '\n';
     return rows;
 }
 int mat_cols(Mat mat){
     int cols = mat.cols;
     Size s = mat.size();
     cols = s.width;
-    //std::cout << cols << '\n';
+    cout << cols << '\n';
     return cols;
 }
 
@@ -170,11 +170,14 @@ int main()
         std::cerr << "cannot open camera" << std::endl;
         return -1;
     }
+    stream1.set(CV_CAP_PROP_FRAME_WIDTH,2000);
+    stream1.set(CV_CAP_PROP_FRAME_HEIGHT,1500);
 
     //Setup mat for source frame and insert feed into mat
     Mat cameraFrame;
     stream1 >> cameraFrame;
     //Gets the resolution of the feed
+    cout << "Resolution: " << '\n';
     int rows=mat_rows(cameraFrame);
     int cols=mat_cols(cameraFrame);
 
