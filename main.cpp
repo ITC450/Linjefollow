@@ -6,8 +6,11 @@
 
 #include <opencv2/opencv.hpp>
 
-//#include "motor.hpp"
-#include "motor_virt.hpp"
+#ifdef __arm__
+  #include "motor.hpp"
+#else
+  #include "motor_virt.hpp"
+#endif
 
 using namespace std;
 using namespace cv;
