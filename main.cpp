@@ -16,6 +16,7 @@ using namespace std;
 using namespace cv;
 int speed;
 
+//rows and cols return the height and width of the stream in pixels
 int mat_rows(Mat mat){
     int rows = mat.rows;
     Size s = mat.size();
@@ -31,6 +32,7 @@ int mat_cols(Mat mat){
     return cols;
 }
 
+//Prepprocessing of the stream, returns a sub Mat of the original stream Mat
 Mat pre_proc(Mat mat, int y_akse, int x_akse){
     Rect firkant = Rect(0,y_akse*0.75,x_akse,y_akse/8);
     Mat Bund = mat(firkant);
@@ -42,6 +44,7 @@ Mat pre_proc2(Mat mat, int y_akse, int x_akse){
     return Bund;
 }
 
+//Finds the center of mass of a Mat and draws it on a given Mat
 int find_point1(Mat cameraFrame,int rows,int cols){
     int afvigelse;
     //Mats and containers
@@ -164,6 +167,7 @@ void MotorFollowLine(int err, Mat mat, int rows, int cols){
 }
 
 int CV_motor_control(){
+    //Init/setup
     MotorInit();
     speed = 50;
     //Video from camera
@@ -172,6 +176,7 @@ int CV_motor_control(){
         std::cerr << "cannot open camera" << std::endl;
         return -1;
     }
+    //.set is for controlling size of stream and the stream mat
     stream1.set(CV_CAP_PROP_FRAME_WIDTH,2000);
     stream1.set(CV_CAP_PROP_FRAME_HEIGHT,1500);
 
