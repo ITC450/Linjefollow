@@ -177,8 +177,8 @@ int CV_motor_control(){
         return -1;
     }
     //.set is for controlling size of stream and the stream mat
-    stream1.set(CV_CAP_PROP_FRAME_WIDTH,2000);
-    stream1.set(CV_CAP_PROP_FRAME_HEIGHT,1500);
+    //stream1.set(CV_CAP_PROP_FRAME_WIDTH,2000);
+    //stream1.set(CV_CAP_PROP_FRAME_HEIGHT,1500);
 
     //Setup mat for source frame and insert feed into mat
     Mat cameraFrame;
