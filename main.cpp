@@ -92,6 +92,35 @@ int find_point(Mat cameraFrame,int rows,int cols, int slice){
     return afvigelse;
 }
 
+int distEsti(std::vector<std::vector<cv::Point2f>> corners){
+    int dist,focal=570;
+    float arucosize=67.78;
+    //float focal=(afstand til camera*pixel count)/diagonal længde;
+    //float focal=(35*)/67.78;
+    Point2f pt1, pt2;
+    pt1=corners[0][0];
+    pt2=corners[0][2];
+    //std::cout << corners[0] << "\n";
+    //std::cout << pt1.x << ", " << pt1.y << "\n";
+    //std::cout << pt2.x << ", " << pt2.y << "\n";
+    double pix = norm(pt1-pt2);
+    dist=(arucosize*focal)/pix;
+    //std::cout << dist << "mm" << "\n";
+    return dist;
+}
+
+int focal(std::vector<std::vector<cv::Point2f>> corners){
+    int dist, focal, fysDist=350;
+    float arucosize=67.78;
+    Point2f pt1, pt2;
+    pt1=corners[0][0];
+    pt2=corners[0][2];
+    double pix = norm(pt1-pt2);
+    focal=(fysDist*pix)/arucosize;
+    //std::cout << focal << "\n";
+    return focal;
+}
+
 void MotorFollowLine(int err, Mat mat, int rows, int cols){
     double error = err * 0.5;
     //std::cout << error << "\n";
@@ -112,7 +141,12 @@ void MotorFollowLine(int err, Mat mat, int rows, int cols){
 
 int CV_motor_control(){
     //Init/setup
+    //aruco marker stuff
     cv::Ptr<cv::aruco::Dictionary> dictionary = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_4X4_50);
+    std::vector<int> ids;
+    std::vector<std::vector<cv::Point2f>> corners;
+    int estimate;
+
     MotorInit();
     speed = 50;
     //Video from camera
@@ -143,11 +177,15 @@ int CV_motor_control(){
             std::cerr<<"the frame is empty"<<std::endl;
             break;
         }
-        std::vector<int> ids;
-        std::vector<std::vector<cv::Point2f>> corners;
         aruco::detectMarkers(cameraFrame, dictionary, corners, ids);
         if (ids.size() > 0) {
             cv::aruco::drawDetectedMarkers(cameraFrame, corners, ids);
+            estimate=distEsti(corners);
+            //estimate=focal(corners);
+            string text;
+            text=to_string(estimate);
+            putText(cameraFrame, "Dist: ", cvPoint(30,30), FONT_HERSHEY_SIMPLEX, 0.8, cvScalar(200,200,250), 1, CV_AA);
+            putText(cameraFrame, text, cvPoint(85,30), FONT_HERSHEY_SIMPLEX, 0.8, cvScalar(200,200,250), 1, CV_AA);
         }
 
         //Find to center points in the lower half of the frame
