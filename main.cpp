@@ -146,6 +146,7 @@ int CV_motor_control(){
     std::vector<int> ids;
     std::vector<std::vector<cv::Point2f>> corners;
     int estimate;
+    string text;
 
     MotorInit();
     speed = 50;
@@ -182,7 +183,6 @@ int CV_motor_control(){
             cv::aruco::drawDetectedMarkers(cameraFrame, corners, ids);
             estimate=distEsti(corners);
             //estimate=focal(corners);
-            string text;
             text=to_string(estimate);
             putText(cameraFrame, "Dist: ", cvPoint(30,30), FONT_HERSHEY_SIMPLEX, 0.8, cvScalar(200,200,250), 1, CV_AA);
             putText(cameraFrame, text, cvPoint(85,30), FONT_HERSHEY_SIMPLEX, 0.8, cvScalar(200,200,250), 1, CV_AA);
