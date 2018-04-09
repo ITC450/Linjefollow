@@ -5,11 +5,12 @@
 #include <time.h>
 
 #include <opencv2/opencv.hpp>
+#include <opencv2/aruco.hpp>
 
 #ifdef __arm__
-  #include "motor.hpp"
+#include "motor.hpp"
 #else
-  #include "motor_virt.hpp"
+#include "motor_virt.hpp"
 #endif
 
 using namespace std;
@@ -52,25 +53,26 @@ int find_point(Mat cameraFrame,int rows,int cols, int slice){
     int largest_contour_index=0;
 
     //Top slice
-    Mat Bund = pre_proc(cameraFrame, rows, cols ,slice);
+    Mat Bund = pre_proc(cameraFrame, rows, cols,slice);
 
     //Masks and find contours
-    GaussianBlur(Bund, blur,Size(5,5),0,0);
+    cvtColor(Bund, cvt, CV_BGR2GRAY);
+    GaussianBlur(cvt, blur,Size(5,5),0,0);
     threshold(blur, thres,70,255,THRESH_BINARY_INV);
     findContours(thres,contours, hierarchy,1,CHAIN_APPROX_NONE);
 
     //Check if no contours
-    if (contours.empty()){
+    if (contours.empty()) {
         return -1;
     }
 
     //Find largest contour
     for( int i = 0; i< contours.size(); i++ ) // iterate through each contour.
     {
-        double a = contourArea(contours[i], false);  //  Find the area of contour
+        double a = contourArea(contours[i], false); //  Find the area of contour
         if (a > largest_area) {
             largest_area = a;
-            largest_contour_index = i;                //Store the index of largest contour
+            largest_contour_index = i;    //Store the index of largest contour
         }
     }
 
@@ -94,15 +96,15 @@ void MotorFollowLine(int err, Mat mat, int rows, int cols){
     double error = err * 0.5;
     //std::cout << error << "\n";
 
-    if(err < 0){
+    if(err < 0) {
         LeftMotor(FORWARD, speed, mat, rows, cols);
-        RightMotor(FORWARD, speed + int(abs(error))  , mat, rows, cols);
+        RightMotor(FORWARD, speed + int(abs(error)), mat, rows, cols);
     }
-    if(err > 0){
+    if(err > 0) {
         RightMotor(FORWARD, speed, mat, rows, cols);
-        LeftMotor(FORWARD, speed + int(abs(error))  , mat, rows, cols);
+        LeftMotor(FORWARD, speed + int(abs(error)), mat, rows, cols);
     }
-    if(err == 0){
+    if(err == 0) {
         RightMotor(FORWARD, speed, mat, rows, cols);
         LeftMotor(FORWARD, speed, mat, rows, cols);
     }
@@ -110,6 +112,7 @@ void MotorFollowLine(int err, Mat mat, int rows, int cols){
 
 int CV_motor_control(){
     //Init/setup
+    cv::Ptr<cv::aruco::Dictionary> dictionary = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_4X4_50);
     MotorInit();
     speed = 50;
     //Video from camera
@@ -125,7 +128,6 @@ int CV_motor_control(){
     //Setup mat for source frame and insert feed into mat
     Mat cameraFrame;
     stream1 >> cameraFrame;
-    cvtColor(cameraFrame, cameraFrame, CV_BGR2GRAY);
     //Gets the resolution of the feed
     cout << "Resolution: " << '\n';
     int rows=mat_rows(cameraFrame);
@@ -141,14 +143,16 @@ int CV_motor_control(){
             std::cerr<<"the frame is empty"<<std::endl;
             break;
         }
-
-        cvtColor(cameraFrame, cameraFrame, CV_BGR2GRAY);
+        std::vector<int> ids;
+        std::vector<std::vector<cv::Point2f>> corners;
+        aruco::detectMarkers(cameraFrame, dictionary, corners, ids);
+        if (ids.size() > 0) {
+            cv::aruco::drawDetectedMarkers(cameraFrame, corners, ids);
+        }
 
         //Find to center points in the lower half of the frame
         int center_point1=find_point(cameraFrame, rows, cols, 7);
         int center_point2=find_point(cameraFrame, rows, cols, 8);
-
-        cvtColor(cameraFrame, cameraFrame, CV_GRAY2BGR);
 
         MotorFollowLine(center_point2, cameraFrame, rows, cols);
         //std::cout << center_point1 << ',';
