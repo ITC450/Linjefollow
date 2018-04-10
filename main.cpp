@@ -121,9 +121,15 @@ int focal(std::vector<std::vector<cv::Point2f>> corners){
     return focal;
 }
 
-void MotorFollowLine(int err, Mat mat, int rows, int cols){
+void MotorFollowLine(int err, Mat mat, int rows, int cols, int status){
     double error = err * 0.5;
     //std::cout << error << "\n";
+
+    if(status != 0) {
+        RightMotor(FORWARD, 0, mat, rows, cols);
+        LeftMotor(FORWARD, 0, mat, rows, cols);
+        return;
+    }
 
     if(err < 0) {
         LeftMotor(FORWARD, speed, mat, rows, cols);
@@ -147,6 +153,7 @@ int CV_motor_control(){
     std::vector<std::vector<cv::Point2f>> corners;
     int estimate;
     string text;
+    int status;
 
     MotorInit();
     speed = 50;
@@ -179,6 +186,7 @@ int CV_motor_control(){
             break;
         }
         aruco::detectMarkers(cameraFrame, dictionary, corners, ids);
+        status=0;
         if (ids.size() > 0) {
             cv::aruco::drawDetectedMarkers(cameraFrame, corners, ids);
             estimate=distEsti(corners);
@@ -186,13 +194,14 @@ int CV_motor_control(){
             text=to_string(estimate);
             putText(cameraFrame, "Dist: ", cvPoint(30,30), FONT_HERSHEY_SIMPLEX, 0.8, cvScalar(200,200,250), 1, CV_AA);
             putText(cameraFrame, text, cvPoint(85,30), FONT_HERSHEY_SIMPLEX, 0.8, cvScalar(200,200,250), 1, CV_AA);
+            status=1;
         }
 
         //Find to center points in the lower half of the frame
         int center_point1=find_point(cameraFrame, rows, cols, 7);
         int center_point2=find_point(cameraFrame, rows, cols, 8);
 
-        MotorFollowLine(center_point2, cameraFrame, rows, cols);
+        MotorFollowLine(center_point2, cameraFrame, rows, cols, status);
         //std::cout << center_point1 << ',';
         //std::cout << center_point2 << '\n';
 
