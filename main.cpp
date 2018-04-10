@@ -93,7 +93,7 @@ int find_point(Mat cameraFrame,int rows,int cols, int slice){
 }
 
 int distEsti(std::vector<std::vector<cv::Point2f>> corners){
-    int dist,focal=570;
+    int dist,focal=500;
     float arucosize=67.78;
     //float focal=(afstand til camera*pixel count)/diagonal længde;
     //float focal=(35*)/67.78;
@@ -110,7 +110,7 @@ int distEsti(std::vector<std::vector<cv::Point2f>> corners){
 }
 
 int focal(std::vector<std::vector<cv::Point2f>> corners){
-    int dist, focal, fysDist=350;
+    int dist, focal, fysDist=200;
     float arucosize=67.78;
     Point2f pt1, pt2;
     pt1=corners[0][0];
@@ -208,10 +208,11 @@ int CV_motor_control(){
         //UI, bottom half
         rectangle( cameraFrame,Point(0,rows*0.75),Point(cols-1,rows-1),Scalar( 0, 255, 0 ),1);
         rectangle( cameraFrame,Point(0,rows*0.875),Point(cols-1,rows-1),Scalar( 0, 255, 0 ),1);
-
+#ifdef __x86_64
         //Show the image/frame
         namedWindow( "Frame", CV_WINDOW_AUTOSIZE );
         imshow("Frame", cameraFrame);
+ #endif
         video.write(cameraFrame);
         //imshow("Threshold", thres);
 
