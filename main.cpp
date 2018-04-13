@@ -130,7 +130,7 @@ void MotorFollowLine(int err, Mat mat, int rows, int cols, std::vector<int> id){
             case 0:
                 RightMotor(BACK, 50, mat, rows, cols);
                 LeftMotor(BACK, 50, mat, rows, cols);
-                return;
+                exit(0);
             default:
                 RightMotor(FORWARD, 0, mat, rows, cols);
                 LeftMotor(FORWARD, 0, mat, rows, cols);
@@ -152,7 +152,7 @@ void MotorFollowLine(int err, Mat mat, int rows, int cols, std::vector<int> id){
     }
 }
 
-int CV_motor_control(){
+int CV_motor_control(VideoCapture &stream1){
     //Init/setup
     //aruco marker stuff
     cv::Ptr<cv::aruco::Dictionary> dictionary = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_4X4_50);
@@ -165,7 +165,6 @@ int CV_motor_control(){
     MotorInit();
     speed = 50;
     //Video from camera
-    VideoCapture stream1(0);
     if(!stream1.isOpened()) {
         std::cerr << "cannot open camera" << std::endl;
         return -1;
@@ -227,13 +226,14 @@ int CV_motor_control(){
         if(c==27)
             break;
     }
-    //Clean up
-    stream1.release();
-    destroyAllWindows();
     return 0;
 }
 
 int main()
 {
-    CV_motor_control();
+    VideoCapture stream1(0);
+    CV_motor_control(stream1);
+    //Clean up
+    stream1.release();
+    destroyAllWindows();
 }
