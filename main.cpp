@@ -192,7 +192,6 @@ int CV_motor_control(VideoCapture &stream1){
             break;
         }
         aruco::detectMarkers(cameraFrame, dictionary, corners, ids);
-        status=0;
         if (ids.size() > 0) {
             cv::aruco::drawDetectedMarkers(cameraFrame, corners, ids);
             estimate=distEsti(corners);
