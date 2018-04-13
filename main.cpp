@@ -131,6 +131,18 @@ void MotorFollowLine(int err, Mat mat, int rows, int cols, std::vector<int> id){
                 RightMotor(BACK, 50, mat, rows, cols);
                 LeftMotor(BACK, 50, mat, rows, cols);
                 exit(0);
+            case 1:
+                RightMotor(FORWARD, 0, mat, rows, cols);
+                LeftMotor(FORWARD, 50, mat, rows, cols);
+                return;
+            case 2:
+                RightMotor(FORWARD, 50, mat, rows, cols);
+                LeftMotor(FORWARD, 0, mat, rows, cols);
+                return;
+            case 3:
+                RightMotor(FORWARD, 50, mat, rows, cols);
+                LeftMotor(FORWARD, 50, mat, rows, cols);
+                return;
             default:
                 RightMotor(FORWARD, 0, mat, rows, cols);
                 LeftMotor(FORWARD, 0, mat, rows, cols);
