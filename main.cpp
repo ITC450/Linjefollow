@@ -128,8 +128,8 @@ void MotorFollowLine(int err, Mat mat, int rows, int cols, std::vector<int> id){
     if (id.size() > 0) {
         switch (id[0]){
             case 0:
-                RightMotor(BACK, 50, mat, rows, cols);
-                LeftMotor(BACK, 50, mat, rows, cols);
+                RightMotor(BACK, 0, mat, rows, cols);
+                LeftMotor(BACK, 0, mat, rows, cols);
                 exit(0);
             case 1:
                 RightMotor(FORWARD, 0, mat, rows, cols);
@@ -140,8 +140,8 @@ void MotorFollowLine(int err, Mat mat, int rows, int cols, std::vector<int> id){
                 LeftMotor(FORWARD, 0, mat, rows, cols);
                 return;
             case 3:
-                RightMotor(FORWARD, 50, mat, rows, cols);
-                LeftMotor(FORWARD, 50, mat, rows, cols);
+                RightMotor(FORWARD, 0, mat, rows, cols);
+                LeftMotor(FORWARD, 0, mat, rows, cols);
                 return;
             default:
                 RightMotor(FORWARD, 0, mat, rows, cols);
