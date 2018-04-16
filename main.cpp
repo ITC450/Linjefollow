@@ -127,10 +127,6 @@ int find_left_point(Mat cameraFrame,int rows,int cols, int slice){
             largest_area = a;
             largest_contour_index = i;    //Store the index of largest contour
         }
-        if (a <=largest_area && a > nd_largest_area) {
-            nd_largest_area = a;
-            nd_largest_contour_index = i;    //Store the index of largest contour
-        }
     }
 
     //Find center of mass(area)
@@ -193,11 +189,8 @@ int find_right_point(Mat cameraFrame,int rows,int cols, int slice){
         double a = contourArea(contours[i], false); //  Find the area of contour
         if (a > largest_area) {
             largest_area = a;
+            nd_largest_contour_index=largest_contour_index;
             largest_contour_index = i;    //Store the index of largest contour
-        }
-        if (a <=largest_area && a > nd_largest_area) {
-            nd_largest_area = a;
-            nd_largest_contour_index = i;    //Store the index of largest contour
         }
     }
 
