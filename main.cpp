@@ -15,7 +15,7 @@
 
 using namespace std;
 using namespace cv;
-int speed;
+//int speed;
 
 //rows and cols return the height and width of the stream in pixels
 int mat_rows(Mat mat){
@@ -92,6 +92,142 @@ int find_point(Mat cameraFrame,int rows,int cols, int slice){
     return afvigelse;
 }
 
+int find_left_point(Mat cameraFrame,int rows,int cols, int slice){
+    int afvigelse;
+    //Mats and containers
+    Mat cvt;
+    Mat blur;
+    Mat thres;
+    vector<vector<Point> > contours;
+    vector<Vec4i> hierarchy;
+    int largest_area=0;
+    int largest_contour_index=0;
+    int nd_largest_area=0;
+    int nd_largest_contour_index=0;
+
+    //Top slice
+    Mat Bund = pre_proc(cameraFrame, rows, cols,slice);
+
+    //Masks and find contours
+    cvtColor(Bund, cvt, CV_BGR2GRAY);
+    GaussianBlur(cvt, blur,Size(5,5),0,0);
+    threshold(blur, thres,70,255,THRESH_BINARY_INV);
+    findContours(thres,contours, hierarchy,1,CHAIN_APPROX_NONE);
+
+    //Check if no contours
+    if (contours.size()<=2) {
+        return -1;
+    }
+
+    //Find largest contour
+    for( int i = 0; i< contours.size(); i++ ) // iterate through each contour.
+    {
+        double a = contourArea(contours[i], false); //  Find the area of contour
+        if (a > largest_area) {
+            largest_area = a;
+            largest_contour_index = i;    //Store the index of largest contour
+        }
+        if (a <=largest_area && a > nd_largest_area) {
+            nd_largest_area = a;
+            nd_largest_contour_index = i;    //Store the index of largest contour
+        }
+    }
+
+    //Find center of mass(area)
+    Moments mu;
+    mu = moments( contours[largest_contour_index], false );
+
+    Point2f mc;
+    mc = Point2f( mu.m10/mu.m00, mu.m01/mu.m00 );
+
+    Moments mu2;
+    mu2 = moments( contours[nd_largest_contour_index], false );
+
+    Point2f mc2;
+    mc2 = Point2f( mu2.m10/mu2.m00, mu2.m01/mu2.m00 );
+
+    if(mc.x >= mc2.x){
+        mc.x=mc2.x;
+        largest_contour_index=nd_largest_contour_index;
+    }
+
+    afvigelse = mc.x-(cols/2);
+
+    //Draw the center and contour outline
+    drawContours( Bund, contours, largest_contour_index, Scalar(255,255,255), 1, 4, hierarchy, 0, Point() );
+    circle( Bund, mc, 4, Scalar(255,255,255), 1, 8, 0 );
+
+    return afvigelse;
+}
+
+int find_right_point(Mat cameraFrame,int rows,int cols, int slice){
+    int afvigelse;
+    //Mats and containers
+    Mat cvt;
+    Mat blur;
+    Mat thres;
+    vector<vector<Point> > contours;
+    vector<Vec4i> hierarchy;
+    int largest_area=0;
+    int largest_contour_index=0;
+    int nd_largest_area=0;
+    int nd_largest_contour_index=0;
+
+    //Top slice
+    Mat Bund = pre_proc(cameraFrame, rows, cols,slice);
+
+    //Masks and find contours
+    cvtColor(Bund, cvt, CV_BGR2GRAY);
+    GaussianBlur(cvt, blur,Size(5,5),0,0);
+    threshold(blur, thres,70,255,THRESH_BINARY_INV);
+    findContours(thres,contours, hierarchy,1,CHAIN_APPROX_NONE);
+
+    //Check if no contours
+    if (contours.size()<=2) {
+        return -1;
+    }
+
+    //Find largest contour
+    for( int i = 0; i< contours.size(); i++ ) // iterate through each contour.
+    {
+        double a = contourArea(contours[i], false); //  Find the area of contour
+        if (a > largest_area) {
+            largest_area = a;
+            largest_contour_index = i;    //Store the index of largest contour
+        }
+        if (a <=largest_area && a > nd_largest_area) {
+            nd_largest_area = a;
+            nd_largest_contour_index = i;    //Store the index of largest contour
+        }
+    }
+
+    Moments mu;
+    mu = moments( contours[largest_contour_index], false );
+
+    Point2f mc;
+    mc = Point2f( mu.m10/mu.m00, mu.m01/mu.m00 );
+
+    Moments mu2;
+    mu2 = moments( contours[nd_largest_contour_index], false );
+
+    Point2f mc2;
+    mc2 = Point2f( mu2.m10/mu2.m00, mu2.m01/mu2.m00 );
+
+    if(mc.x <= mc2.x){
+        mc.x=mc2.x;
+        largest_contour_index=nd_largest_contour_index;
+    }
+
+
+    afvigelse = mc.x-(cols/2);
+
+    //Draw the center and contour outline
+    drawContours( Bund, contours, largest_contour_index, Scalar(255,255,255), 1, 4, hierarchy, 0, Point() );
+    circle( Bund, mc, 4, Scalar(255,255,255), 1, 8, 0 );
+
+    return afvigelse;
+}
+
 int distEsti(std::vector<std::vector<cv::Point2f>> corners){
     int dist,focal=500;
     float arucosize=67.78;
@@ -121,35 +257,9 @@ int focal(std::vector<std::vector<cv::Point2f>> corners){
     return focal;
 }
 
-void MotorFollowLine(int err, Mat mat, int rows, int cols, std::vector<int> id){
+void MotorFollowLine(int err, Mat mat, int rows, int cols, std::vector<int> id,int speed){
     double error = err * 0.5;
     //std::cout << error << "\n";
-
-    if (id.size() > 0) {
-        switch (id[0]){
-            case 0:
-                RightMotor(BACK, 0, mat, rows, cols);
-                LeftMotor(BACK, 0, mat, rows, cols);
-                exit(0);
-            case 1:
-                RightMotor(FORWARD, 0, mat, rows, cols);
-                LeftMotor(FORWARD, 50, mat, rows, cols);
-                return;
-            case 2:
-                RightMotor(FORWARD, 50, mat, rows, cols);
-                LeftMotor(FORWARD, 0, mat, rows, cols);
-                return;
-            case 3:
-                RightMotor(FORWARD, 0, mat, rows, cols);
-                LeftMotor(FORWARD, 0, mat, rows, cols);
-                return;
-            default:
-                RightMotor(FORWARD, 0, mat, rows, cols);
-                LeftMotor(FORWARD, 0, mat, rows, cols);
-                return;
-        }
-    }
-
     if(err < 0) {
         LeftMotor(FORWARD, speed, mat, rows, cols);
         RightMotor(FORWARD, speed + int(abs(error)), mat, rows, cols);
@@ -174,8 +284,11 @@ int CV_motor_control(VideoCapture &stream1){
     string text;
     int status;
 
+    int center_point1;
+    int center_point2;
+
     MotorInit();
-    speed = 50;
+    int speed = 50;
     //Video from camera
     if(!stream1.isOpened()) {
         std::cerr << "cannot open camera" << std::endl;
@@ -213,11 +326,46 @@ int CV_motor_control(VideoCapture &stream1){
             putText(cameraFrame, text, cvPoint(85,30), FONT_HERSHEY_SIMPLEX, 0.8, cvScalar(200,200,250), 1, CV_AA);
         }
 
-        //Find to center points in the lower half of the frame
-        int center_point1=find_point(cameraFrame, rows, cols, 7);
-        int center_point2=find_point(cameraFrame, rows, cols, 8);
+        if (ids.size() > 0) {
+            switch (ids[0]){
+                //Kill
+                case 0:
+                    RightMotor(BACK, 0, cameraFrame, rows, cols);
+                    LeftMotor(BACK, 0, cameraFrame, rows, cols);
+                    exit(0);
+                //Stop
+                case 1:
+                    RightMotor(FORWARD, 0, cameraFrame, rows, cols);
+                    LeftMotor(FORWARD, 0, cameraFrame, rows, cols);
+                    break;
+                //Slow
+                case 2:
+                    speed=50;
+                    break;
+                //Fast
+                case 3:
+                    speed=100;
+                    break;
+                //Left
+                case 4:
+                center_point2=find_left_point(cameraFrame, rows, cols, 8);
+                    break;
+                //Right
+                case 5:
+                center_point2=find_right_point(cameraFrame, rows, cols, 8);
+                    break;
+                default:
+                    RightMotor(FORWARD, 0, cameraFrame, rows, cols);
+                    LeftMotor(FORWARD, 0, cameraFrame, rows, cols);
+                    break;
+            }
+        }
+        if (ids.size() == 0) {
+          center_point1=find_point(cameraFrame, rows, cols, 7);
+          center_point2=find_point(cameraFrame, rows, cols, 8);
+        }
 
-        MotorFollowLine(center_point2, cameraFrame, rows, cols, ids);
+        MotorFollowLine(center_point2, cameraFrame, rows, cols, ids, speed);
         //std::cout << center_point1 << ',';
         //std::cout << center_point2 << '\n';
 
