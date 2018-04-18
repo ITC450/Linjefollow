@@ -125,11 +125,11 @@ void MotorFollowLine(int err, Mat mat, int rows, int cols, std::vector<int> id,i
     double error = err * 0.5;
     //std::cout << error << "\n";
     if(err < 0) {
-        LeftMotor(FORWARD, speed, mat, rows, cols);
+        LeftMotor(FORWARD, speed - (0.5*int(abs(error))), mat, rows, cols);
         RightMotor(FORWARD, speed + int(abs(error)), mat, rows, cols);
     }
     if(err > 0) {
-        RightMotor(FORWARD, speed, mat, rows, cols);
+        RightMotor(FORWARD, speed - (0.5*int(abs(error))), mat, rows, cols);
         LeftMotor(FORWARD, speed + int(abs(error)), mat, rows, cols);
     }
     if(err == 0) {
@@ -152,7 +152,7 @@ int CV_motor_control(VideoCapture &stream1){
     int center_point2;
 
     MotorInit();
-    int speed = 50;
+    int speed = 100;
     //Video from camera
     if(!stream1.isOpened()) {
         std::cerr << "cannot open camera" << std::endl;
