@@ -146,7 +146,7 @@ int CV_motor_control(VideoCapture &stream1){
     std::vector<std::vector<cv::Point2f>> corners;
     int estimate;
     string text;
-    int status;
+    int status=0;
 
     int center_point1;
     int center_point2;
@@ -196,31 +196,49 @@ int CV_motor_control(VideoCapture &stream1){
                 case 0:
                     RightMotor(BACK, 0, cameraFrame, rows, cols);
                     LeftMotor(BACK, 0, cameraFrame, rows, cols);
-                    std::cout << "Case 0 - Exit program" << '\n';
+                    if (ids[0] != status) {
+                        std::cout << "Case 0 - Exit program" << '\n';
+                    }
+                    status=ids[0];
                     exit(0);
                 //Stop
                 case 1:
                     RightMotor(FORWARD, 0, cameraFrame, rows, cols);
                     LeftMotor(FORWARD, 0, cameraFrame, rows, cols);
-                    std::cout << "Case 1 - Stop motors" << '\n';
+                    if (ids[0] != status) {
+                        std::cout << "Case 1 - Stop motor" << '\n';
+                    }
+                    status=ids[0];
                     break;
                 //Slow
                 case 2:
                     speed=50;
-                    std::cout << "Case 2 - Motor speed 50" << '\n';
+                    if (ids[0] != status) {
+                        std::cout << "Case 2 - Speed = 50" << '\n';
+                    }
+                    status=ids[0];
                     break;
                 //Fast
                 case 3:
                     speed=100;
-                    std::cout << "Case 3 - Motor speed 100" << '\n';
+                    if (ids[0] != status) {
+                        std::cout << "Case 3 - Speed = 100" << '\n';
+                    }
+                    status=ids[0];
                     break;
                 //Left
                 case 4:
-                    std::cout << "Case 4 - TBD" << '\n';
+                    if (ids[0] != status) {
+                        std::cout << "Case 4 - TBD" << '\n';
+                    }
+                    status=ids[0];
                     break;
                 //Right
                 case 5:
-                    std::cout << "Case 5 - TBD" << '\n';
+                    if (ids[0] != status) {
+                        std::cout << "Case 5 - TBD" << '\n';
+                    }
+                    status=ids[0];
                     break;
                 default:
                     RightMotor(FORWARD, 0, cameraFrame, rows, cols);
@@ -228,10 +246,12 @@ int CV_motor_control(VideoCapture &stream1){
                     break;
             }
         }
+
         if (ids.size() == 0) {
-          center_point1=find_point(cameraFrame, rows, cols, 7);
-          center_point2=find_point(cameraFrame, rows, cols, 8);
+          //center_point1=find_point(cameraFrame, rows, cols, 7);
+          //center_point2=find_point(cameraFrame, rows, cols, 8);
         }
+
 
         //MotorFollowLine(center_point2, cameraFrame, rows, cols, ids, speed);
         //std::cout << center_point1 << ',';
