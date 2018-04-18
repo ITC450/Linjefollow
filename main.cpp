@@ -152,7 +152,7 @@ int CV_motor_control(VideoCapture &stream1){
     int center_point2;
 
     MotorInit();
-    int speed = 100;
+    int speed = 150;
     //Video from camera
     if(!stream1.isOpened()) {
         std::cerr << "cannot open camera" << std::endl;
@@ -208,12 +208,12 @@ int CV_motor_control(VideoCapture &stream1){
                         break;
                         //Slow
                     case 2:
-                        speed = 50;
+                        speed = 100;
                         std::cout << "Case 2 - Speed = 50" << '\n';
                         break;
                         //Fast
                     case 3:
-                        speed = 100;
+                        speed = 200;
                         std::cout << "Case 3 - Speed = 100" << '\n';
                         break;
                         //Left
