@@ -176,95 +176,82 @@ int CV_motor_control(VideoCapture &stream1){
         //Insert feed into frame mat
         stream1 >> cameraFrame;
         //Check if feed has stopped
-        if(cameraFrame.empty()) {
-            std::cerr<<"the frame is empty"<<std::endl;
+        if (cameraFrame.empty()) {
+            std::cerr << "the frame is empty" << std::endl;
             break;
         }
         aruco::detectMarkers(cameraFrame, dictionary, corners, ids);
         if (ids.size() > 0) {
             cv::aruco::drawDetectedMarkers(cameraFrame, corners, ids);
-            estimate=distEsti(corners);
+            estimate = distEsti(corners);
             //estimate=focal(corners);
-            text=to_string(estimate);
-            putText(cameraFrame, "Dist: ", cvPoint(30,30), FONT_HERSHEY_SIMPLEX, 0.8, cvScalar(200,200,250), 1, CV_AA);
-            putText(cameraFrame, text, cvPoint(85,30), FONT_HERSHEY_SIMPLEX, 0.8, cvScalar(200,200,250), 1, CV_AA);
+            text = to_string(estimate);
+            putText(cameraFrame, "Dist: ", cvPoint(30, 30), FONT_HERSHEY_SIMPLEX, 0.8, cvScalar(200, 200, 250), 1,
+                    CV_AA);
+            putText(cameraFrame, text, cvPoint(85, 30), FONT_HERSHEY_SIMPLEX, 0.8, cvScalar(200, 200, 250), 1, CV_AA);
         }
 
         if (ids.size() > 0) {
-            switch (ids[0]){
-                //Kill
-                case 0:
-                    RightMotor(BACK, 0, cameraFrame, rows, cols);
-                    LeftMotor(BACK, 0, cameraFrame, rows, cols);
-                    if (ids[0] != status) {
+            if (ids[0] != status) {
+                switch (ids[0]) {
+                    //Kill
+                    case 0:
+                        RightMotor(BACK, 0, cameraFrame, rows, cols);
+                        LeftMotor(BACK, 0, cameraFrame, rows, cols);
                         std::cout << "Case 0 - Exit program" << '\n';
-                    }
-                    status=ids[0];
-                    exit(0);
-                //Stop
-                case 1:
-                    RightMotor(FORWARD, 0, cameraFrame, rows, cols);
-                    LeftMotor(FORWARD, 0, cameraFrame, rows, cols);
-                    if (ids[0] != status) {
+                        exit(0);
+                        //Stop
+                    case 1:
+                        RightMotor(FORWARD, 0, cameraFrame, rows, cols);
+                        LeftMotor(FORWARD, 0, cameraFrame, rows, cols);
                         std::cout << "Case 1 - Stop motor" << '\n';
-                    }
-                    status=ids[0];
-                    break;
-                //Slow
-                case 2:
-                    speed=50;
-                    if (ids[0] != status) {
+                        break;
+                        //Slow
+                    case 2:
+                        speed = 50;
                         std::cout << "Case 2 - Speed = 50" << '\n';
-                    }
-                    status=ids[0];
-                    break;
-                //Fast
-                case 3:
-                    speed=100;
-                    if (ids[0] != status) {
+                        break;
+                        //Fast
+                    case 3:
+                        speed = 100;
                         std::cout << "Case 3 - Speed = 100" << '\n';
-                    }
-                    status=ids[0];
-                    break;
-                //Left
-                case 4:
-                    if (ids[0] != status) {
+                        break;
+                        //Left
+                    case 4:
                         std::cout << "Case 4 - TBD" << '\n';
-                    }
-                    status=ids[0];
-                    break;
-                //Right
-                case 5:
-                    if (ids[0] != status) {
+                        break;
+                        //Right
+                    case 5:
                         std::cout << "Case 5 - TBD" << '\n';
-                    }
-                    status=ids[0];
-                    break;
-                default:
-                    RightMotor(FORWARD, 0, cameraFrame, rows, cols);
-                    LeftMotor(FORWARD, 0, cameraFrame, rows, cols);
-                    break;
+                        break;
+                    default:
+                        RightMotor(FORWARD, 0, cameraFrame, rows, cols);
+                        LeftMotor(FORWARD, 0, cameraFrame, rows, cols);
+                        break;
+                }
             }
+            status = ids[0];
         }
 
         if (ids.size() == 0) {
-          //center_point1=find_point(cameraFrame, rows, cols, 7);
-          //center_point2=find_point(cameraFrame, rows, cols, 8);
+            //center_point1=find_point(cameraFrame, rows, cols, 7);
+            center_point2 = find_point(cameraFrame, rows, cols, 8);
         }
 
-
-        //MotorFollowLine(center_point2, cameraFrame, rows, cols, ids, speed);
+        if (status != 1) {
+            MotorFollowLine(center_point2, cameraFrame, rows, cols, ids, speed);
+        }
         //std::cout << center_point1 << ',';
         //std::cout << center_point2 << '\n';
 
         //UI, bottom half
-        //rectangle( cameraFrame,Point(0,rows*0.75),Point(cols-1,rows-1),Scalar( 0, 255, 0 ),1);
-        //rectangle( cameraFrame,Point(0,rows*0.875),Point(cols-1,rows-1),Scalar( 0, 255, 0 ),1);
+        rectangle( cameraFrame,Point(0,rows*0.75),Point(cols-1,rows-1),Scalar( 0, 255, 0 ),1);
+        rectangle( cameraFrame,Point(0,rows*0.875),Point(cols-1,rows-1),Scalar( 0, 255, 0 ),1);
 #ifdef __x86_64
         //Show the image/frame
         namedWindow( "Frame", CV_WINDOW_AUTOSIZE );
         imshow("Frame", cameraFrame);
- #endif
+#endif
         video.write(cameraFrame);
         //imshow("Threshold", thres);
 
