@@ -233,13 +233,13 @@ int CV_motor_control(VideoCapture &stream1){
             status = ids[0];
         }
 
-        if (ids.size() == 0) {
-            //center_point1=find_point(cameraFrame, rows, cols, 7);
-            center_point2 = find_point(cameraFrame, rows, cols, 8);
-        }
+
+        center_point1=find_point(cameraFrame, rows, cols, 7);
+        center_point2 = find_point(cameraFrame, rows, cols, 8);
+
 
         if (status != 1) {
-            MotorFollowLine(center_point2, cameraFrame, rows, cols, ids, speed);
+            MotorFollowLine(center_point1, cameraFrame, rows, cols, ids, speed);
         }
         //std::cout << center_point1 << ',';
         //std::cout << center_point2 << '\n';
