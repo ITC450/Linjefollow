@@ -40,6 +40,55 @@ Mat pre_proc(Mat mat, int y_akse, int x_akse, int slice){
     return Bund;
 }
 
+//Distance estimater
+int distEsti(std::vector<std::vector<cv::Point2f>> corners){
+    int dist,focal=500;
+    float arucosize=67.78;
+    //float focal=(afstand til camera*pixel count)/diagonal længde;
+    //float focal=(35*)/67.78;
+    Point2f pt1, pt2;
+    pt1=corners[0][0];
+    pt2=corners[0][2];
+    //std::cout << corners[0] << "\n";
+    //std::cout << pt1.x << ", " << pt1.y << "\n";
+    //std::cout << pt2.x << ", " << pt2.y << "\n";
+    double pix = norm(pt1-pt2);
+    dist=(arucosize*focal)/pix;
+    //std::cout << dist << "mm" << "\n";
+    return dist;
+}
+
+//Focal length calculater
+int focal(std::vector<std::vector<cv::Point2f>> corners){
+    int dist, focal, fysDist=200;
+    float arucosize=67.78;
+    Point2f pt1, pt2;
+    pt1=corners[0][0];
+    pt2=corners[0][2];
+    double pix = norm(pt1-pt2);
+    focal=(fysDist*pix)/arucosize;
+    //std::cout << focal << "\n";
+    return focal;
+}
+
+//Follow line function
+void MotorFollowLine(int err, Mat mat, int rows, int cols, int speed){
+    double error = err * 0.5;
+    //std::cout << error << "\n";
+    if(err < 0) {
+        LeftMotor(FORWARD, speed - (0.5*int(abs(error))), mat, rows, cols);
+        RightMotor(FORWARD, speed + int(abs(error)), mat, rows, cols);
+    }
+    if(err > 0) {
+        RightMotor(FORWARD, speed - (0.5*int(abs(error))), mat, rows, cols);
+        LeftMotor(FORWARD, speed + int(abs(error)), mat, rows, cols);
+    }
+    if(err == 0) {
+        RightMotor(FORWARD, speed, mat, rows, cols);
+        LeftMotor(FORWARD, speed, mat, rows, cols);
+    }
+}
+
 //Finds the center of mass of a Mat and draws it on a given Mat
 int vej_foelger(Mat cameraFrame,int rows,int cols, int slice){
     int afvigelse;
@@ -90,55 +139,6 @@ int vej_foelger(Mat cameraFrame,int rows,int cols, int slice){
     circle( Bund, mc, 4, Scalar(255,255,255), 1, 8, 0 );
 
     return afvigelse;
-}
-
-//Distance estimater
-int distEsti(std::vector<std::vector<cv::Point2f>> corners){
-    int dist,focal=500;
-    float arucosize=67.78;
-    //float focal=(afstand til camera*pixel count)/diagonal længde;
-    //float focal=(35*)/67.78;
-    Point2f pt1, pt2;
-    pt1=corners[0][0];
-    pt2=corners[0][2];
-    //std::cout << corners[0] << "\n";
-    //std::cout << pt1.x << ", " << pt1.y << "\n";
-    //std::cout << pt2.x << ", " << pt2.y << "\n";
-    double pix = norm(pt1-pt2);
-    dist=(arucosize*focal)/pix;
-    //std::cout << dist << "mm" << "\n";
-    return dist;
-}
-
-//Focal length calculater
-int focal(std::vector<std::vector<cv::Point2f>> corners){
-    int dist, focal, fysDist=200;
-    float arucosize=67.78;
-    Point2f pt1, pt2;
-    pt1=corners[0][0];
-    pt2=corners[0][2];
-    double pix = norm(pt1-pt2);
-    focal=(fysDist*pix)/arucosize;
-    //std::cout << focal << "\n";
-    return focal;
-}
-
-//Follow line function
-void MotorFollowLine(int err, Mat mat, int rows, int cols, int speed){
-    double error = err * 0.5;
-    //std::cout << error << "\n";
-    if(err < 0) {
-        LeftMotor(FORWARD, speed - (0.5*int(abs(error))), mat, rows, cols);
-        RightMotor(FORWARD, speed + int(abs(error)), mat, rows, cols);
-    }
-    if(err > 0) {
-        RightMotor(FORWARD, speed - (0.5*int(abs(error))), mat, rows, cols);
-        LeftMotor(FORWARD, speed + int(abs(error)), mat, rows, cols);
-    }
-    if(err == 0) {
-        RightMotor(FORWARD, speed, mat, rows, cols);
-        LeftMotor(FORWARD, speed, mat, rows, cols);
-    }
 }
 
 //Detect signs
