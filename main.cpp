@@ -74,7 +74,7 @@ int focal(std::vector<std::vector<cv::Point2f>> corners){
 //Follow line function
 void MotorFollowLine(int err, Mat mat, int rows, int cols, int speed){
     double error = err * 0.5;
-    //std::cout << error << "\n";
+    std::cout << error << "\n";
     if(err < 0) {
         LeftMotor(FORWARD, speed - int(abs(error)), mat, rows, cols);
         RightMotor(FORWARD, speed + int(abs(error)), mat, rows, cols);
@@ -255,14 +255,13 @@ int CV_motor_control(VideoCapture &stream1){
             break;
         }
 
-        point1 = vej_foelger(cameraFrame, rows, cols, 7);
+        point1 = vej_foelger(cameraFrame, rows, cols, 8);
 
         id = objekt_genkendelse(cameraFrame);
 
         motor_kontrol_enhed(id, cameraFrame, rows, cols, speed, point1, status);
 
         //UI, bottom half
-        rectangle( cameraFrame,Point(0,rows*0.75),Point(cols-1,rows-1),Scalar( 0, 255, 0 ),1);
         rectangle( cameraFrame,Point(0,rows*0.875),Point(cols-1,rows-1),Scalar( 0, 255, 0 ),1);
 #ifdef __x86_64
         //Show the image/frame
