@@ -92,6 +92,7 @@ int vej_foelger(Mat cameraFrame,int rows,int cols, int slice){
     return afvigelse;
 }
 
+//Distance estimater
 int distEsti(std::vector<std::vector<cv::Point2f>> corners){
     int dist,focal=500;
     float arucosize=67.78;
@@ -109,6 +110,7 @@ int distEsti(std::vector<std::vector<cv::Point2f>> corners){
     return dist;
 }
 
+//Focal length calculater
 int focal(std::vector<std::vector<cv::Point2f>> corners){
     int dist, focal, fysDist=200;
     float arucosize=67.78;
@@ -121,6 +123,7 @@ int focal(std::vector<std::vector<cv::Point2f>> corners){
     return focal;
 }
 
+//Follow line function
 void MotorFollowLine(int err, Mat mat, int rows, int cols, int speed){
     double error = err * 0.5;
     //std::cout << error << "\n";
@@ -138,6 +141,7 @@ void MotorFollowLine(int err, Mat mat, int rows, int cols, int speed){
     }
 }
 
+//Detect signs
 vector<int>  objekt_genkendelse(Mat cameraFrame){
     std::vector<int> ids;
     cv::Ptr<cv::aruco::Dictionary> dictionary = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_4X4_50);
@@ -148,16 +152,17 @@ vector<int>  objekt_genkendelse(Mat cameraFrame){
     aruco::detectMarkers(cameraFrame, dictionary, corners, ids);
     if (ids.size() > 0) {
         cv::aruco::drawDetectedMarkers(cameraFrame, corners, ids);
-        estimate = distEsti(corners);
+/*        estimate = distEsti(corners);
         //estimate=focal(corners);
         text = to_string(estimate);
         putText(cameraFrame, "Dist: ", cvPoint(30, 30), FONT_HERSHEY_SIMPLEX, 0.8, cvScalar(200, 200, 250), 1,
                 CV_AA);
-        putText(cameraFrame, text, cvPoint(85, 30), FONT_HERSHEY_SIMPLEX, 0.8, cvScalar(200, 200, 250), 1, CV_AA);
+        putText(cameraFrame, text, cvPoint(85, 30), FONT_HERSHEY_SIMPLEX, 0.8, cvScalar(200, 200, 250), 1, CV_AA);*/
     }
     return ids;
 }
 
+//General motor control unit
 void motor_kontrol_enhed(vector<int> ids, Mat cameraFrame, int rows, int cols, int &speed, int point, int &status){
 
     if (ids.size() > 0) {
