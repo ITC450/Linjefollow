@@ -7,12 +7,6 @@
 #include <opencv2/opencv.hpp>
 #include <opencv2/aruco.hpp>
 
-#ifdef __arm__
-#include "motor.hpp"
-#else
-#include "motor_virt.hpp"
-#endif
-
 using namespace std;
 using namespace cv;
 //int speed;
@@ -38,58 +32,6 @@ Mat pre_proc(Mat mat, int y_akse, int x_akse, int slice){
     Rect firkant = Rect(0,y_akse*(0.125*(slice-1)),x_akse,y_akse/8);
     Mat Bund = mat(firkant);
     return Bund;
-}
-
-//Distance estimater
-int distEsti(std::vector<std::vector<cv::Point2f>> corners){
-    int dist,focal=500;
-    float arucosize=67.78;
-    //float focal=(afstand til camera*pixel count)/diagonal længde;
-    //float focal=(35*)/67.78;
-    Point2f pt1, pt2;
-    pt1=corners[0][0];
-    pt2=corners[0][2];
-    //std::cout << corners[0] << "\n";
-    //std::cout << pt1.x << ", " << pt1.y << "\n";
-    //std::cout << pt2.x << ", " << pt2.y << "\n";
-    double pix = norm(pt1-pt2);
-    dist=(arucosize*focal)/pix;
-    //std::cout << dist << "mm" << "\n";
-    return dist;
-}
-
-//Focal length calculater
-int focal(std::vector<std::vector<cv::Point2f>> corners){
-    int dist, focal, fysDist=200;
-    float arucosize=67.78;
-    Point2f pt1, pt2;
-    pt1=corners[0][0];
-    pt2=corners[0][2];
-    double pix = norm(pt1-pt2);
-    focal=(fysDist*pix)/arucosize;
-    //std::cout << focal << "\n";
-    return focal;
-}
-
-//Follow line function
-void MotorFollowLine(int err, Mat mat, int rows, int cols, int speed){
-    double error = err * 0.5;
-    std::cout << error << "\n";
-    if(err < 0) {
-        LeftMotor(FORWARD, speed - int(abs(error)), mat, rows, cols);
-        RightMotor(FORWARD, speed + int(abs(error)), mat, rows, cols);
-        return;
-    }
-    if(err > 0) {
-        RightMotor(FORWARD, speed - int(abs(error)), mat, rows, cols);
-        LeftMotor(FORWARD, speed + int(abs(error)), mat, rows, cols);
-        return;
-    }
-    if(err == 0) {
-        RightMotor(FORWARD, speed, mat, rows, cols);
-        LeftMotor(FORWARD, speed, mat, rows, cols);
-        return;
-    }
 }
 
 //Finds the center of mass of a Mat and draws it on a given Mat
@@ -144,88 +86,9 @@ int vej_foelger(Mat cameraFrame,int rows,int cols, int slice){
     return afvigelse;
 }
 
-//Detect signs
-vector<int>  objekt_genkendelse(Mat cameraFrame){
-    std::vector<int> ids;
-    cv::Ptr<cv::aruco::Dictionary> dictionary = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_4X4_50);
-    std::vector<std::vector<cv::Point2f>> corners;
-    int estimate;
-    string text;
-
-    aruco::detectMarkers(cameraFrame, dictionary, corners, ids);
-    if (ids.size() > 0) {
-        cv::aruco::drawDetectedMarkers(cameraFrame, corners, ids);
-/*        estimate = distEsti(corners);
-        //estimate=focal(corners);
-        text = to_string(estimate);
-        putText(cameraFrame, "Dist: ", cvPoint(30, 30), FONT_HERSHEY_SIMPLEX, 0.8, cvScalar(200, 200, 250), 1,
-                CV_AA);
-        putText(cameraFrame, text, cvPoint(85, 30), FONT_HERSHEY_SIMPLEX, 0.8, cvScalar(200, 200, 250), 1, CV_AA);*/
-    }
-    return ids;
-}
-
-//General motor control unit
-void motor_kontrol_enhed(vector<int> ids, Mat cameraFrame, int rows, int cols, int &speed, int point, int &status){
-
-    if (ids.size() > 0) {
-        if (ids[0] != status) {
-            switch (ids[0]) {
-                //Kill
-                case 0:
-                    RightMotor(BACK, 0, cameraFrame, rows, cols);
-                    LeftMotor(BACK, 0, cameraFrame, rows, cols);
-                    std::cout << "Case 0 - Exit program" << '\n';
-                    exit(0);
-                    //Stop
-                case 1:
-                    RightMotor(FORWARD, 0, cameraFrame, rows, cols);
-                    LeftMotor(FORWARD, 0, cameraFrame, rows, cols);
-                    std::cout << "Case 1 - Stop motor" << '\n';
-                    break;
-                    //Slow
-                case 2:
-                    speed = 100;
-                    std::cout << "Case 2 - Speed = 50" << '\n';
-                    break;
-                    //Fast
-                case 3:
-                    speed = 200;
-                    std::cout << "Case 3 - Speed = 100" << '\n';
-                    break;
-                    //Left
-                case 4:
-                    std::cout << "Case 4 - TBD" << '\n';
-                    break;
-                    //Right
-                case 5:
-                    std::cout << "Case 5 - TBD" << '\n';
-                    break;
-                default:
-                    RightMotor(FORWARD, 0, cameraFrame, rows, cols);
-                    LeftMotor(FORWARD, 0, cameraFrame, rows, cols);
-                    break;
-            }
-        }
-        status = ids[0];
-    }
-    else{
-        status=-1;
-    }
-
-    if (status != 1) {
-        MotorFollowLine(point, cameraFrame, rows, cols, speed);
-    }
-}
-
 int CV_motor_control(VideoCapture &stream1){
     //Init/setup
     vector<int> id;
-    int status;
-    int point1;
-    int speed = 150;
-
-    MotorInit();
 
     //Video from camera
     if(!stream1.isOpened()) {
@@ -254,12 +117,6 @@ int CV_motor_control(VideoCapture &stream1){
             std::cerr << "the frame is empty" << std::endl;
             break;
         }
-
-        point1 = vej_foelger(cameraFrame, rows, cols, 8);
-
-        id = objekt_genkendelse(cameraFrame);
-
-        motor_kontrol_enhed(id, cameraFrame, rows, cols, speed, point1, status);
 
         //UI, bottom half
         rectangle( cameraFrame,Point(0,rows*0.875),Point(cols-1,rows-1),Scalar( 0, 255, 0 ),1);
