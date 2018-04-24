@@ -239,6 +239,7 @@ int CV_motor_control(VideoCapture &stream1){
     //Setup mat for source frame and insert feed into mat
     Mat cameraFrame;
     stream1 >> cameraFrame;
+    imwrite("image.jpeg",cameraFrame);
     //Gets the resolution of the feed
     cout << "Resolution: " << '\n';
     int rows=mat_rows(cameraFrame);
