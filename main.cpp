@@ -71,26 +71,7 @@ int focal(std::vector<std::vector<cv::Point2f>> corners){
     return focal;
 }
 
-//Follow line function
-void MotorFollowLine(int err, Mat mat, int rows, int cols, int speed){
-    double error = err * 0.5;
-    std::cout << error << "\n";
-    if(err < 0) {
-        LeftMotor(FORWARD, speed - int(abs(error)), mat, rows, cols);
-        RightMotor(FORWARD, speed + int(abs(error)), mat, rows, cols);
-        return;
-    }
-    if(err > 0) {
-        RightMotor(FORWARD, speed - int(abs(error)), mat, rows, cols);
-        LeftMotor(FORWARD, speed + int(abs(error)), mat, rows, cols);
-        return;
-    }
-    if(err == 0) {
-        RightMotor(FORWARD, speed, mat, rows, cols);
-        LeftMotor(FORWARD, speed, mat, rows, cols);
-        return;
-    }
-}
+
 
 //Finds the center of mass of a Mat and draws it on a given Mat
 int vej_foelger(Mat cameraFrame,int rows,int cols, int slice){
