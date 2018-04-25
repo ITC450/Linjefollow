@@ -43,9 +43,22 @@ void RightMotor(direction dir, int speed, Mat mat, int rows, int cols) {
     pwmWrite(23,speed);
 }
 
+double radius(double error){
+  double r = (pow(q,2)+pow(error,2))/(2*error);
+  return r;
+}
+
+uint16_t pwmSpeed(double v){
+  double ps=-80.64516129 * log((-2189*v+1488.66558)/(5000*v+2189));
+  return (uint16_t)ps;
+}
+
+double highV(int speed, double radius){
+
+}
 //Follow line function
 void MotorFollowLine(int err, Mat mat, int rows, int cols, int speed){
-    double error = err * 0.5;
+    double error = errDist(err);
     std::cout << error << "\n";
     if(err < 0) {
         LeftMotor(FORWARD, speed - int(abs(error)), mat, rows, cols);
