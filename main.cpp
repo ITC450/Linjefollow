@@ -7,6 +7,19 @@
 #include <opencv2/opencv.hpp>
 #include <opencv2/aruco.hpp>
 
+#include <string.h>
+#include <dirent.h>
+#include "matx.h"
+#include "neu.h"
+#include <unistd.h>
+#include <sys/types.h>
+#include <unistd.h>
+#include <sys/wait.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <sys/types.h>
+#include <unistd.h>
+
 using namespace std;
 using namespace cv;
 //int speed;
@@ -86,9 +99,31 @@ int vej_foelger(Mat cameraFrame,int rows,int cols, int slice){
     return afvigelse;
 }
 
+matrix convert(Mat &input){
+  matrix res;
+
+  return res
+}
+
+vector<int> NN(Mat input){
+  vector<int> res;
+  matrix inputVector;
+
+  inputVector=convert(input);
+
+  for (int k = 0; k < inTst->cols; k++) elm(nninput, k, 0) = elm(inTstNorm, j, k);
+  bpe_forward(nninput, nn_net, &nnoutput);
+  cout << "OensketOut: \t" << elm(outTst,j,0) << " : \t\t" << elm(outTst,j,1) << " : \t\t" << elm(outTst,j,2) << endl;
+  cout << "NNOut: \t\t"<< elm(nnoutput,0,0) << " : \t" << elm(nnoutput,1,0) << " : \t" << elm(nnoutput,2,0) << endl;
+
+  return res;
+}
+
 int CV_motor_control(VideoCapture &stream1){
     //Init/setup
     vector<int> id;
+
+    mlp_net        *nn_net;
 
     //Video from camera
     if(!stream1.isOpened()) {
