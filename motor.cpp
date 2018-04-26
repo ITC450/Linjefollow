@@ -43,7 +43,7 @@ void RightMotor(direction dir, int speed, Mat mat, int rows, int cols) {
     pwmWrite(23,speed);
 }
 
-double integral = 0;
+double inte = 0;
 //std::chrono::time_point start;
 //std::chrono::time_point end;
 int last_err = 0;
@@ -55,9 +55,9 @@ double pid(int err) {
     double Pout = kp * err; // P delen udregnes
   //  auto end = std::chrono::high_resolution_clock::now();
     //auto result = std::chrono::duration_cast<std::chrono::microseconds>(end-start);
-  integral +=  err;  // I delen udregnes
+  inte +=  err;  // I delen udregnes
   //  start = std::chrono::high_resolution_clock::now();
-    double Iout = ki * integral;
+    double Iout = ki * inte;
     double derivative = (err - last_err);
     double Dout = kd * derivative;
 
