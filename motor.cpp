@@ -53,14 +53,14 @@ int pwmSpeed(double v){
   return int(ps);
 }
 
-double highV(int speed, double &radius){
+double highV(int speed, double radius){
   double hv =(speed*(AKSEL + 2*radius))/(2*radius);
   return hv;
 }
 
 double lowV(int speed, double hv){
-  double lv = 2*speed-hv
-  return lv
+  double lv = 2*speed-hv;
+  return lv;
 }
 
 void speedCheck(double &hv, double &lv, double &radius){
