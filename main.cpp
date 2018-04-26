@@ -7,19 +7,6 @@
 #include <opencv2/opencv.hpp>
 #include <opencv2/aruco.hpp>
 
-#include <string.h>
-#include <dirent.h>
-#include "matx.h"
-#include "neu.h"
-#include <unistd.h>
-#include <sys/types.h>
-#include <unistd.h>
-#include <sys/wait.h>
-#include <fcntl.h>
-#include <errno.h>
-#include <sys/types.h>
-#include <unistd.h>
-
 using namespace std;
 using namespace cv;
 //int speed;
@@ -99,31 +86,49 @@ int vej_foelger(Mat cameraFrame,int rows,int cols, int slice){
     return afvigelse;
 }
 
-matrix convert(Mat &input){
-  matrix res;
+Mat scan(Mat image){
+    Mat sign;
+    Mat cvt;
+    Mat thres;
+    vector<vector<Point> > contours;
+    vector<Vec4i> hierarchy;
 
-  return res
-}
+    cvtColor(image, cvt, CV_BGR2GRAY);
+    threshold(cvt, thres,70,255,THRESH_BINARY_INV);
+    findContours(thres,contours, hierarchy,1,CHAIN_APPROX_NONE);
 
-vector<int> NN(Mat input){
-  vector<int> res;
-  matrix inputVector;
+    int largest_area=0;
+    int largest_contour_index=0;
 
-  inputVector=convert(input);
+    //Check if no contours
+    if (contours.empty()) {
+        return thres;
+    }
 
-  for (int k = 0; k < inTst->cols; k++) elm(nninput, k, 0) = elm(inTstNorm, j, k);
-  bpe_forward(nninput, nn_net, &nnoutput);
-  cout << "OensketOut: \t" << elm(outTst,j,0) << " : \t\t" << elm(outTst,j,1) << " : \t\t" << elm(outTst,j,2) << endl;
-  cout << "NNOut: \t\t"<< elm(nnoutput,0,0) << " : \t" << elm(nnoutput,1,0) << " : \t" << elm(nnoutput,2,0) << endl;
+    //Find largest contour
+    for( int i = 0; i< contours.size(); i++ ) // iterate through each contour.
+    {
+        double a = contourArea(contours[i], false); //  Find the area of contour
+        if (a > largest_area) {
+            largest_area = a;
+            largest_contour_index = i;    //Store the index of largest contour
+        }
+    }
 
-  return res;
+    //Find center of mass(area)
+    Moments mu;
+    mu = moments( contours[largest_contour_index], false );
+
+    Point2f mc;
+    mc = Point2f( mu.m10/mu.m00, mu.m01/mu.m00 );
+
+    //Draw the center and contour outline
+    drawContours( image, contours, largest_contour_index, Scalar(255,255,255), 1, 4, hierarchy, 0, Point() );
+
+    return thres;
 }
 
 int CV_motor_control(VideoCapture &stream1){
-    //Init/setup
-    vector<int> id;
-
-    mlp_net        *nn_net;
 
     //Video from camera
     if(!stream1.isOpened()) {
@@ -153,8 +158,9 @@ int CV_motor_control(VideoCapture &stream1){
             break;
         }
 
-        //UI, bottom half
-        rectangle( cameraFrame,Point(0,rows*0.875),Point(cols-1,rows-1),Scalar( 0, 255, 0 ),1);
+        imshow("Test", scan(cameraFrame));
+
+
 #ifdef __x86_64
         //Show the image/frame
         namedWindow( "Frame", CV_WINDOW_AUTOSIZE );
