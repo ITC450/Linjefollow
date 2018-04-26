@@ -23,7 +23,7 @@ void MotorFollowLine(int err, Mat mat, int rows, int cols, int speed);
 
 double radius(double error);
 
-uint16_t pwmSpeed(double v);
+int pwmSpeed(double v);
 
 double highV(int speed, double radius);
 
