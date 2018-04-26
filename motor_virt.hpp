@@ -18,14 +18,14 @@ void LeftMotor(direction dir, int speed, Mat mat, int rows, int cols);
 
 void RightMotor(direction dir, int speed, Mat mat, int rows, int cols);
 
-void MotorFollowLine(int err, Mat mat, int rows, int cols, int speed);
+void MotorFollowLine(int err, Mat mat, int rows, int cols, double speed);
 
 double radius(double error);
 
 int pwmSpeed(double v);
 
-double highV(int speed, double radius);
+double highV(double speed, double radius);
 
-double lowV(int speed, double hv);
+double lowV(double speed, double hv);
 
 void speedCheck(double &hv, double &lv, double &radius);

@@ -33,12 +33,12 @@ int pwmSpeed(double v){
   return int(ps);
 }
 
-double highV(int speed, double &radius){
+double highV(double speed, double radius){
   double hv =(speed*(AKSEL + 2*radius))/(2*radius);
   return hv;
 }
 
-double lowV(int speed, double hv){
+double lowV(double speed, double hv){
   double lv = 2*speed-hv;
   return lv;
 }
@@ -55,7 +55,7 @@ void speedCheck(double &hv, double &lv, double &radius){
 }
 
 //Follow line function
-void MotorFollowLine(int err, Mat mat, int rows, int cols, int speed){
+void MotorFollowLine(int err, Mat mat, int rows, int cols, double speed){
     double error = abs(errDist(err));
     //std::cout << error << "\n";
     double rad = radius(error);
