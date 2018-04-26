@@ -71,7 +71,7 @@ double pid(int err) {
 
 //Follow line function
 void MotorFollowLine(int err, Mat mat, int rows, int cols, int speed){
-    double error = err * 0.5;
+    double error = pid(err);
     std::cout << error << "\n";
     if(err < 0) {
         LeftMotor(FORWARD, speed - int(abs(error)), mat, rows, cols);
