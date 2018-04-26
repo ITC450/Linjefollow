@@ -87,8 +87,8 @@ void MotorFollowLine(int err, Mat mat, int rows, int cols, int speed){
         return;
     }
     if(err > 0) {
-        RightMotor(FORWARD, pwmSpeed(hv), mat, rows, cols);
-        LeftMotor(FORWARD, pwmSpeed(lv), mat, rows, cols);
+        RightMotor(FORWARD, pwmSpeed(lv), mat, rows, cols);
+        LeftMotor(FORWARD, pwmSpeed(hv), mat, rows, cols);
         return;
     }
     if(err == 0) {
