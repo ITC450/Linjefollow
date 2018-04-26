@@ -62,8 +62,8 @@ double pid(int err) {
     double Dout = kd * derivative;
 
     double output = Pout + Dout ;//+ Iout;
-    if (output > 450)output = 450; // sørger for output holder sig inden for range
-    else if (output < 50)output = 50; // myPID.Compute();
+    //if (output > 450)output = 450; // sørger for output holder sig inden for range
+    //else if (output < 50)output = 50; // myPID.Compute();
 
     last_err=err;
     return output;
