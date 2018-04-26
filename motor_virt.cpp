@@ -24,7 +24,8 @@ void RightMotor(direction dir, int speed, Mat mat, int rows, int cols) {
 }
 
 double radius(double error){
-  double r = (pow(Q,2)+pow(error,2))/(2*error);
+  double r = (pow(Q,2)+pow(error,2))/(8*error);
+  std::cout << "radius" << r <<'\n';
   return r;
 }
 
@@ -68,8 +69,8 @@ void MotorFollowLine(int err, Mat mat, int rows, int cols, double speed){
         return;
     }
     if(err > 0) {
-        RightMotor(FORWARD, pwmSpeed(hv), mat, rows, cols);
-        LeftMotor(FORWARD, pwmSpeed(lv), mat, rows, cols);
+        RightMotor(FORWARD, pwmSpeed(lv), mat, rows, cols);
+        LeftMotor(FORWARD, pwmSpeed(hv), mat, rows, cols);
         return;
     }
     if(err == 0) {

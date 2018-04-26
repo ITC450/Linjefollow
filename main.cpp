@@ -204,7 +204,7 @@ int CV_motor_control(VideoCapture &stream1){
     vector<int> id;
     int status;
     int point1;
-    double speed = 0.2;
+    double speed = 0.4;
 
     MotorInit();
 

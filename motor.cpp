@@ -20,11 +20,11 @@ void LeftMotor(direction dir, int speed, Mat mat, int rows, int cols) {
     {
         digitalWrite(2,HIGH);
         digitalWrite(3,LOW);
-        //arrowedLine(mat, Point2f(cols/8,rows/2),     Point2f(cols/8,    (rows/2)+speed), Scalar(0,255-speed,speed), 1, 8, 0);
+        arrowedLine(mat, Point2f(cols/8,rows/2),     Point2f(cols/8,    (rows/2)+speed), Scalar(0,255-speed,speed), 1, 8, 0);
     }else{
         digitalWrite(2,LOW);
         digitalWrite(3,HIGH);
-        //arrowedLine(mat, Point2f(cols/8,rows/2),     Point2f(cols/8,    (rows/2)-speed), Scalar(0,255-speed,speed), 1, 8, 0);
+        arrowedLine(mat, Point2f(cols/8,rows/2),     Point2f(cols/8,    (rows/2)-speed), Scalar(0,255-speed,speed), 1, 8, 0);
     }
     pwmWrite(1,speed);
 }
@@ -44,7 +44,7 @@ void RightMotor(direction dir, int speed, Mat mat, int rows, int cols) {
 }
 
 double radius(double error){
-  double r = (pow(Q,2)+pow(error,2))/(2*error);
+  double r = (pow(Q,2)+pow(error,2))/(8*error);
   return r;
 }
 
