@@ -43,8 +43,8 @@ void RightMotor(direction dir, int speed, Mat mat, int rows, int cols) {
     pwmWrite(23,speed);
 }
 
-double integral = 0;
-std::chrono::time_point start;
+//double integral = 0;
+//std::chrono::time_point start;
 //std::chrono::time_point end;
 int last_err = 0;
 
@@ -53,15 +53,15 @@ double pid(int err) {
 
 
     double Pout = kp * err; // P delen udregnes
-    auto end = std::chrono::high_resolution_clock::now();
-    auto result = std::chrono::duration_cast<std::chrono::microseconds>(end-start);
-    integral += (result.count() * err);  // I delen udregnes
-    start = std::chrono::high_resolution_clock::now();
-    double Iout = ki * integral;
+  //  auto end = std::chrono::high_resolution_clock::now();
+    //auto result = std::chrono::duration_cast<std::chrono::microseconds>(end-start);
+  //  integral += (result.count() * err);  // I delen udregnes
+  //  start = std::chrono::high_resolution_clock::now();
+  //  double Iout = ki * integral;
     double derivative = (err - last_err);
     double Dout = kd * derivative;
 
-    double output = Pout + Iout + Dout;
+    double output = Pout + Dout ;//+ Iout;
     if (output > 450)output = 450; // sørger for output holder sig inden for range
     else if (output < 50)output = 50; // myPID.Compute();
 
