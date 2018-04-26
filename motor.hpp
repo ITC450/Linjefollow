@@ -6,8 +6,8 @@
 #include <cmath>
 
 #define errDist(err) (0.0004309*err-0.007083)
-#define q
-#define a
+#define Q 0.168
+#define AKSEL 0.12
 
 using namespace cv;
 
@@ -26,3 +26,7 @@ double radius(double error);
 uint16_t pwmSpeed(double v);
 
 double highV(int speed, double radius);
+
+double lowV(int speed, double hv);
+
+void speedCheck(double &hv, double &lv, double &radius);
