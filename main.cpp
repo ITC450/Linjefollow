@@ -34,6 +34,14 @@ Mat pre_proc(Mat mat, int y_akse, int x_akse, int slice){
     return Bund;
 }
 
+//Function for resizeing Mats
+Mat reSize(Mat input){
+    Mat output;
+    Size size(55,55);//the dst image size,e.g.100x100
+    resize(input,output,size);//resize image
+    return output;
+}
+
 //Finds the center of mass of a Mat and draws it on a given Mat
 int vej_foelger(Mat cameraFrame,int rows,int cols, int slice){
     int afvigelse;
@@ -86,15 +94,21 @@ int vej_foelger(Mat cameraFrame,int rows,int cols, int slice){
     return afvigelse;
 }
 
-Mat scan(Mat image){
+Mat scan(Mat image, Mat descriptors2, vector<KeyPoint> keypoints2, Mat reference){
     Mat sign;
     Mat cvt;
+    Mat blur;
     Mat thres;
     vector<vector<Point> > contours;
     vector<Vec4i> hierarchy;
+    double polygonalApproxAccuracyRate = 0.05;
+
+    vector< Point > approxCurve;
 
     cvtColor(image, cvt, CV_BGR2GRAY);
-    threshold(cvt, thres,70,255,THRESH_BINARY_INV);
+/*    GaussianBlur(cvt, blur,Size(5,5),0,0);
+    //Para 6,7: block size and mean subtracted value
+    adaptiveThreshold(blur, thres,255,ADAPTIVE_THRESH_GAUSSIAN_C,THRESH_BINARY,11,2);
     findContours(thres,contours, hierarchy,1,CHAIN_APPROX_NONE);
 
     int largest_area=0;
@@ -113,19 +127,57 @@ Mat scan(Mat image){
             largest_area = a;
             largest_contour_index = i;    //Store the index of largest contour
         }
+    }*/
+
+    //######################
+    Mat features;
+
+    std::vector<KeyPoint> keypoints1;
+    keypoints1.clear();
+    Mat descriptors1;
+
+    Ptr<Feature2D> orb = ORB::create(500);
+    orb->detectAndCompute(image, Mat(), keypoints1, descriptors1);
+    drawKeypoints(image,keypoints1,features);
+
+
+    std::vector<DMatch> matches;
+    matches.clear();
+    if (keypoints1.size()!=0) {
+        Ptr<DescriptorMatcher> matcher = DescriptorMatcher::create("BruteForce-Hamming");
+        matcher->match(descriptors2, descriptors1, matches, Mat());
+
+        sort(matches.begin(), matches.end());
+
+        const int numGoodMatches = matches.size() * 0.15f;
+        matches.erase(matches.begin() + numGoodMatches, matches.end());
+
+        drawMatches(reference, keypoints2, image, keypoints1, matches, features);
+
+
+        // Extract location of good matches
+        std::vector<Point2f> points1, points2;
+        for (size_t i = 0; i < matches.size(); i++) {
+            points1.push_back(keypoints2[matches[i].queryIdx].pt);
+            points2.push_back(keypoints1[matches[i].trainIdx].pt);
+        }
+        Mat h = findHomography(points2, points1, RANSAC);
+
+        cout << h << h.empty() << "\n";
+        Mat imReg;
+        if (h.empty()!=1) {
+            warpPerspective(image, sign, h, Size(400,400));
+            sign=reSize(sign);
+            imshow("sign", sign );
+        }
     }
 
-    //Find center of mass(area)
-    Moments mu;
-    mu = moments( contours[largest_contour_index], false );
+    //imshow("features", features );
+    //###########################
 
-    Point2f mc;
-    mc = Point2f( mu.m10/mu.m00, mu.m01/mu.m00 );
-
-    //Draw the center and contour outline
-    drawContours( image, contours, largest_contour_index, Scalar(255,255,255), 1, 4, hierarchy, 0, Point() );
-
-    return thres;
+    //approxPolyDP(contours[largest_contour_index], approxCurve, double(contours[largest_contour_index].size()) * polygonalApproxAccuracyRate, true);
+    //drawContours( image, contours, largest_contour_index, Scalar(255,255,255), 1, 4, hierarchy, 0, Point() );
+    return features;
 }
 
 int CV_motor_control(VideoCapture &stream1){
@@ -149,6 +201,19 @@ int CV_motor_control(VideoCapture &stream1){
     //Save as  settings
     VideoWriter video("linefollower.avi",CV_FOURCC('M','J','P','G'),30, Size(cols,rows));
 
+//####################################
+    Mat reference = imread("50kmt.jpg");
+    //Mat reference = imread("sign.png");
+
+    std::vector<KeyPoint> keypoints1;
+    Mat descriptors1;
+
+    Ptr<Feature2D> orb = ORB::create(500);
+    orb->detectAndCompute(reference, Mat(), keypoints1, descriptors1);
+    drawKeypoints(reference,keypoints1,reference);
+    //imshow("reference", reference );
+    //###########################################
+
     while (true) {
         //Insert feed into frame mat
         stream1 >> cameraFrame;
@@ -158,13 +223,13 @@ int CV_motor_control(VideoCapture &stream1){
             break;
         }
 
-        imshow("Test", scan(cameraFrame));
+        imshow("Test", scan(cameraFrame, descriptors1, keypoints1, reference));
 
 
 #ifdef __x86_64
         //Show the image/frame
-        namedWindow( "Frame", CV_WINDOW_AUTOSIZE );
-        imshow("Frame", cameraFrame);
+        //namedWindow( "Frame", CV_WINDOW_AUTOSIZE );
+        //imshow("Frame", cameraFrame);
 #endif
         video.write(cameraFrame);
         //imshow("Threshold", thres);
@@ -179,7 +244,7 @@ int CV_motor_control(VideoCapture &stream1){
 
 int main()
 {
-    VideoCapture stream1(0);
+    VideoCapture stream1(1);
     CV_motor_control(stream1);
     //Clean up
     stream1.release();
