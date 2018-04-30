@@ -163,7 +163,7 @@ Mat scan(Mat image, Mat descriptors2, vector<KeyPoint> keypoints2, Mat reference
         }
         Mat h = findHomography(points2, points1, RANSAC);
 
-        cout << h << h.empty() << "\n";
+        //cout << h << h.empty() << "\n";
         Mat imReg;
         if (h.empty()!=1) {
             warpPerspective(image, sign, h, Size(400,400));
@@ -244,7 +244,7 @@ int CV_motor_control(VideoCapture &stream1){
 
 int main()
 {
-    VideoCapture stream1(1);
+    VideoCapture stream1(0);
     CV_motor_control(stream1);
     //Clean up
     stream1.release();
