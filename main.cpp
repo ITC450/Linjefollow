@@ -167,7 +167,7 @@ Mat scan(Mat image, Mat descriptors2, vector<KeyPoint> keypoints2, Mat reference
         Mat imReg;
         if (h.empty()!=1) {
             warpPerspective(image, sign, h, Size(400,400));
-            sign=reSize(sign);
+            //sign=reSize(sign);
             imshow("sign", sign );
         }
     }
