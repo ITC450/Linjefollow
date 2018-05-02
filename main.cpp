@@ -3,9 +3,14 @@
 #include <cstdlib>
 #include <iostream>
 #include <time.h>
+#include <string.h>
 
 #include <opencv2/opencv.hpp>
 #include <opencv2/aruco.hpp>
+#include "opencv2/core/core.hpp"
+#include "opencv2/imgproc/imgproc.hpp"
+#include "opencv2/highgui/highgui.hpp"
+#include <math.h>
 
 using namespace std;
 using namespace cv;
@@ -94,90 +99,167 @@ int vej_foelger(Mat cameraFrame,int rows,int cols, int slice){
     return afvigelse;
 }
 
-Mat scan(Mat image, Mat descriptors2, vector<KeyPoint> keypoints2, Mat reference){
-    Mat sign;
-    Mat cvt;
-    Mat blur;
-    Mat thres;
+static double angle( Point pt1, Point pt2, Point pt0 )
+{
+    double dx1 = pt1.x - pt0.x;
+    double dy1 = pt1.y - pt0.y;
+    double dx2 = pt2.x - pt0.x;
+    double dy2 = pt2.y - pt0.y;
+    return (dx1*dx2 + dy1*dy2)/sqrt((dx1*dx1 + dy1*dy1)*(dx2*dx2 + dy2*dy2) + 1e-10);
+}
+
+static void findSquares( const Mat& image, vector<vector<Point> >& squares )
+{
+    int thresh = 50, N = 5;
+    squares.clear();
+
+//s    Mat pyr, timg, gray0(image.size(), CV_8U), gray;
+
+    // down-scale and upscale the image to filter out the noise
+    //pyrDown(image, pyr, Size(image.cols/2, image.rows/2));
+    //pyrUp(pyr, timg, image.size());
+
+
+    // blur will enhance edge detection
+    Mat timg(image);
+    medianBlur(image, timg, 9);
+    Mat gray0(timg.size(), CV_8U), gray;
+
     vector<vector<Point> > contours;
-    vector<Vec4i> hierarchy;
-    double polygonalApproxAccuracyRate = 0.05;
 
-    vector< Point > approxCurve;
-
-    cvtColor(image, cvt, CV_BGR2GRAY);
-/*    GaussianBlur(cvt, blur,Size(5,5),0,0);
-    //Para 6,7: block size and mean subtracted value
-    adaptiveThreshold(blur, thres,255,ADAPTIVE_THRESH_GAUSSIAN_C,THRESH_BINARY,11,2);
-    findContours(thres,contours, hierarchy,1,CHAIN_APPROX_NONE);
-
-    int largest_area=0;
-    int largest_contour_index=0;
-
-    //Check if no contours
-    if (contours.empty()) {
-        return thres;
-    }
-
-    //Find largest contour
-    for( int i = 0; i< contours.size(); i++ ) // iterate through each contour.
+    // find squares in every color plane of the image
+    for( int c = 0; c < 3; c++ )
     {
-        double a = contourArea(contours[i], false); //  Find the area of contour
-        if (a > largest_area) {
-            largest_area = a;
-            largest_contour_index = i;    //Store the index of largest contour
-        }
-    }*/
+        int ch[] = {c, 0};
+        mixChannels(&timg, 1, &gray0, 1, ch, 1);
 
-    //######################
-    Mat features;
+        // try several threshold levels
+        for( int l = 0; l < N; l++ )
+        {
+            // hack: use Canny instead of zero threshold level.
+            // Canny helps to catch squares with gradient shading
+            if( l == 0 )
+            {
+                // apply Canny. Take the upper threshold from slider
+                // and set the lower to 0 (which forces edges merging)
+                Canny(gray0, gray, 5, thresh, 5);
+                // dilate canny output to remove potential
+                // holes between edge segments
+                dilate(gray, gray, Mat(), Point(-1,-1));
+            }
+            else
+            {
+                // apply threshold if l!=0:
+                //     tgray(x,y) = gray(x,y) < (l+1)*255/N ? 255 : 0
+                gray = gray0 >= (l+1)*255/N;
+            }
 
-    std::vector<KeyPoint> keypoints1;
-    keypoints1.clear();
-    Mat descriptors1;
+            // find contours and store them all as a list
+            findContours(gray, contours, RETR_LIST, CHAIN_APPROX_SIMPLE);
 
-    Ptr<Feature2D> orb = ORB::create(500);
-    orb->detectAndCompute(image, Mat(), keypoints1, descriptors1);
-    drawKeypoints(image,keypoints1,features);
+            vector<Point> approx;
 
+            // test each contour
+            for( size_t i = 0; i < contours.size(); i++ )
+            {
+                // approximate contour with accuracy proportional
+                // to the contour perimeter
+                approxPolyDP(Mat(contours[i]), approx, arcLength(Mat(contours[i]), true)*0.02, true);
 
-    std::vector<DMatch> matches;
-    matches.clear();
-    if (keypoints1.size()!=0) {
-        Ptr<DescriptorMatcher> matcher = DescriptorMatcher::create("BruteForce-Hamming");
-        matcher->match(descriptors2, descriptors1, matches, Mat());
+                // square contours should have 4 vertices after approximation
+                // relatively large area (to filter out noisy contours)
+                // and be convex.
+                // Note: absolute value of an area is used because
+                // area may be positive or negative - in accordance with the
+                // contour orientation
+                if( approx.size() == 4 &&
+                    fabs(contourArea(Mat(approx))) > 1000 &&
+                    isContourConvex(Mat(approx)) )
+                {
+                    double maxCosine = 0;
 
-        sort(matches.begin(), matches.end());
+                    for( int j = 2; j < 5; j++ )
+                    {
+                        // find the maximum cosine of the angle between joint edges
+                        double cosine = fabs(angle(approx[j%4], approx[j-2], approx[j-1]));
+                        maxCosine = MAX(maxCosine, cosine);
+                    }
 
-        const int numGoodMatches = matches.size() * 0.15f;
-        matches.erase(matches.begin() + numGoodMatches, matches.end());
-
-        drawMatches(reference, keypoints2, image, keypoints1, matches, features);
-
-
-        // Extract location of good matches
-        std::vector<Point2f> points1, points2;
-        for (size_t i = 0; i < matches.size(); i++) {
-            points1.push_back(keypoints2[matches[i].queryIdx].pt);
-            points2.push_back(keypoints1[matches[i].trainIdx].pt);
-        }
-        Mat h = findHomography(points2, points1, RANSAC);
-
-        //cout << h << h.empty() << "\n";
-        Mat imReg;
-        if (h.empty()!=1) {
-            warpPerspective(image, sign, h, Size(400,400));
-            //sign=reSize(sign);
-            imshow("sign", sign );
+                    // if cosines of all angles are small
+                    // (all angles are ~90 degree) then write quandrange
+                    // vertices to resultant sequence
+                    if( maxCosine < 0.3 )
+                        squares.push_back(approx);
+                }
+            }
         }
     }
+}
 
-    //imshow("features", features );
-    //###########################
+static void drawSquares( Mat& image, const vector<vector<Point> >& squares )
+{
+    for( size_t i = 0; i < squares.size(); i++ )
+    {
+        const Point* p = &squares[i][0];
 
-    //approxPolyDP(contours[largest_contour_index], approxCurve, double(contours[largest_contour_index].size()) * polygonalApproxAccuracyRate, true);
-    //drawContours( image, contours, largest_contour_index, Scalar(255,255,255), 1, 4, hierarchy, 0, Point() );
-    return features;
+        int n = (int)squares[i].size();
+        //dont detect the border
+        if (p-> x > 3 && p->y > 3)
+            polylines(image, &p, &n, 1, true, Scalar(0,255,0), 1, LINE_AA);
+    }
+
+    imshow("features", image);
+}
+
+struct sortY {
+    bool operator() (cv::Point2f pt1, cv::Point2f pt2) { return (pt1.y < pt2.y);}
+} mySortY;
+struct sortX {
+    bool operator() (cv::Point2f pt1, cv::Point2f pt2) { return (pt1.x < pt2.x);}
+} mySortX;
+
+void pers_corr(Mat image, const vector<vector<Point> >& squares){
+    Mat fixed;
+    Mat h;
+    vector<Point2f> warped_dst;
+    vector<Point2f> src_2f;
+    warped_dst.clear();
+    src_2f.clear();
+
+    warped_dst.push_back(Point2f(0,0));
+    warped_dst.push_back(Point2f(399,0));
+    warped_dst.push_back(Point2f(0,399));
+    warped_dst.push_back(Point2f(399,399));
+
+    if (squares.size()>0){
+
+        src_2f.push_back(Point2f(squares[0][0]));
+        src_2f.push_back(Point2f(squares[0][1]));
+        src_2f.push_back(Point2f(squares[0][2]));
+        src_2f.push_back(Point2f(squares[0][3]));
+
+        std::sort(src_2f.begin(),src_2f.end(),mySortY);
+        std::sort(src_2f.begin(),src_2f.begin()+2,mySortX);
+        std::sort(src_2f.begin()+2,src_2f.end(),mySortX);
+
+        h = getPerspectiveTransform(src_2f, warped_dst);
+    }
+
+    //cout << h << h.empty() << "\n";
+    if (h.empty()!=1) {
+        warpPerspective(image, fixed, h, Size(400,400));
+        //sign=reSize(sign);
+        imshow("sign", fixed );
+    }
+}
+
+void scan(Mat image){
+    Mat features=image.clone();
+    vector<vector<Point> > squares;
+    findSquares(features, squares);
+    cout << squares.size() << "\n";
+    pers_corr(image,squares);
+    drawSquares(image, squares);
 }
 
 int CV_motor_control(VideoCapture &stream1){
@@ -201,19 +283,6 @@ int CV_motor_control(VideoCapture &stream1){
     //Save as  settings
     VideoWriter video("linefollower.avi",CV_FOURCC('M','J','P','G'),30, Size(cols,rows));
 
-//####################################
-    Mat reference = imread("50kmt.jpg");
-    //Mat reference = imread("sign.png");
-
-    std::vector<KeyPoint> keypoints1;
-    Mat descriptors1;
-
-    Ptr<Feature2D> orb = ORB::create(500);
-    orb->detectAndCompute(reference, Mat(), keypoints1, descriptors1);
-    drawKeypoints(reference,keypoints1,reference);
-    //imshow("reference", reference );
-    //###########################################
-
     while (true) {
         //Insert feed into frame mat
         stream1 >> cameraFrame;
@@ -223,7 +292,7 @@ int CV_motor_control(VideoCapture &stream1){
             break;
         }
 
-        imshow("Test", scan(cameraFrame, descriptors1, keypoints1, reference));
+        scan(cameraFrame);
 
 
 #ifdef __x86_64
