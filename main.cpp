@@ -134,7 +134,7 @@ static void findSquares( const Mat& image, vector<vector<Point> >& squares )
 
 
 
-    imshow("test", timg);
+    //imshow("test", timg);
     // find contours and store them all as a list
     findContours(timg, contours, RETR_LIST, CHAIN_APPROX_SIMPLE);
 
