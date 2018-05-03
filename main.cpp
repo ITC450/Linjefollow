@@ -43,8 +43,10 @@ Mat pre_proc(Mat mat, int y_akse, int x_akse, int slice){
 //Function for resizeing Mats
 Mat reSize(Mat input){
     Mat output;
-    Size size(55,55);//the dst image size,e.g.100x100
+    Size size(20,20);//the dst image size,e.g.100x100
     resize(input,output,size);//resize image
+    Rect firkant = Rect(2,2,16,16);
+    output=output(firkant);
     return output;
 }
 
@@ -235,7 +237,7 @@ void pers_corr(Mat image, const vector<vector<Point> >& squares){
     if (h.empty()!=1) {
         warpPerspective(image, fixed, h, Size(400,400));
         fixed=reSize(fixed);
-        string ff = "/home/pi/projekt/Linjefollow/imgtest/10/"+to_string(filename)+".png";
+        string ff = "../imgtest/"+to_string(filename)+".png";
         imwrite(ff,fixed);
         filename++;
         sleep(1);
