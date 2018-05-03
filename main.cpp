@@ -4,6 +4,7 @@
 #include <iostream>
 #include <time.h>
 #include <string.h>
+#include <unistd.h>
 
 #include <opencv2/opencv.hpp>
 #include <opencv2/aruco.hpp>
@@ -203,6 +204,7 @@ struct sortX {
 } mySortX;
 
 void pers_corr(Mat image, const vector<vector<Point> >& squares){
+    static int filename=1;
     Mat fixed;
     Mat h;
     vector<Point2f> warped_dst;
@@ -232,8 +234,11 @@ void pers_corr(Mat image, const vector<vector<Point> >& squares){
     //cout << h << h.empty() << "\n";
     if (h.empty()!=1) {
         warpPerspective(image, fixed, h, Size(400,400));
-        //sign=reSize(sign);
-        //imshow("sign", fixed );
+        fixed=reSize(fixed);
+        string ff = "../imgtest/"+to_string(filename)+".png";
+        imwrite(ff,fixed);
+        filename++;
+        sleep(1);
     }
 }
 
@@ -281,8 +286,8 @@ int CV_motor_control(VideoCapture &stream1){
 
 #ifdef __x86_64
         //Show the image/frame
-        //namedWindow( "Frame", CV_WINDOW_AUTOSIZE );
-        //imshow("Frame", cameraFrame);
+        namedWindow( "Frame", CV_WINDOW_AUTOSIZE );
+        imshow("Frame", cameraFrame);
 #endif
         video.write(cameraFrame);
         //imshow("Threshold", thres);
