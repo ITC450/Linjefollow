@@ -125,12 +125,12 @@ static void findSquares( const Mat& image, vector<vector<Point> >& squares )
 
     // blur will enhance edge detection
     Mat timg(image);
-    medianBlur(image, timg, 7);
+    medianBlur(image, timg, 3);
     cvtColor(timg, timg, CV_BGR2GRAY);
 
     vector<vector<Point> > contours;
 
-    adaptiveThreshold(timg, timg,255,ADAPTIVE_THRESH_GAUSSIAN_C,THRESH_BINARY,21,2);
+    threshold(timg, timg,70,255,THRESH_BINARY_INV);
 
 
 
