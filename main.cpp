@@ -235,7 +235,7 @@ void pers_corr(Mat image, const vector<vector<Point> >& squares){
     if (h.empty()!=1) {
         warpPerspective(image, fixed, h, Size(400,400));
         fixed=reSize(fixed);
-        string ff = "../imgtest/"+to_string(filename)+".png";
+        string ff = "/home/pi/projekt/Linjefollow/imgtest/10/"+to_string(filename)+".png";
         imwrite(ff,fixed);
         filename++;
         sleep(1);
