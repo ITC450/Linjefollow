@@ -114,7 +114,6 @@ struct sortArea {
 
 static void findSquares( const Mat& image, vector<vector<Point> >& squares )
 {
-    int thresh = 50, N = 5;
     squares.clear();
 
 //s    Mat pyr, timg, gray0(image.size(), CV_8U), gray;
@@ -126,16 +125,16 @@ static void findSquares( const Mat& image, vector<vector<Point> >& squares )
 
     // blur will enhance edge detection
     Mat timg(image);
-    medianBlur(image, timg, 9);
+    medianBlur(image, timg, 7);
     cvtColor(timg, timg, CV_BGR2GRAY);
 
     vector<vector<Point> > contours;
 
-    adaptiveThreshold(timg, timg,255,ADAPTIVE_THRESH_GAUSSIAN_C,THRESH_BINARY,17,2);
+    adaptiveThreshold(timg, timg,255,ADAPTIVE_THRESH_GAUSSIAN_C,THRESH_BINARY,21,2);
 
 
 
-    //imshow("test", timg);
+    imshow("test", timg);
     // find contours and store them all as a list
     findContours(timg, contours, RETR_LIST, CHAIN_APPROX_SIMPLE);
 
