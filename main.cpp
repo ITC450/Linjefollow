@@ -135,7 +135,7 @@ static void findSquares( const Mat& image, vector<vector<Point> >& squares )
 
 
 
-    imshow("test", timg);
+    //imshow("test", timg);
     // find contours and store them all as a list
     findContours(timg, contours, RETR_LIST, CHAIN_APPROX_SIMPLE);
 
@@ -193,7 +193,7 @@ static void drawSquares( Mat& image, const vector<vector<Point> >& squares )
             polylines(image, &p, &n, 1, true, Scalar(0,255,0), 1, LINE_AA);
     }
 
-    imshow("features", image);
+    //imshow("features", image);
 }
 
 struct sortY {
@@ -234,7 +234,7 @@ void pers_corr(Mat image, const vector<vector<Point> >& squares){
     if (h.empty()!=1) {
         warpPerspective(image, fixed, h, Size(400,400));
         //sign=reSize(sign);
-        imshow("sign", fixed );
+        //imshow("sign", fixed );
     }
 }
 
