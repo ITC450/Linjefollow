@@ -333,7 +333,7 @@ int CV_motor_control(VideoCapture &stream1){
     MotorInit();
     cout <<"done\n";
 
-    cout <<"Setting up NN....";
+    cout <<"Setting up NN........";
     //NNinit();
     cout <<"done\n";
 
@@ -393,7 +393,9 @@ int CV_motor_control(VideoCapture &stream1){
 
 int main()
 {
+    cout <<"Setting up camera....";
     VideoCapture stream1(0);
+    cout <<"done\n";
     CV_motor_control(stream1);
     //Clean up
     stream1.release();
