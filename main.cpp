@@ -12,6 +12,9 @@
 #include "opencv2/highgui/highgui.hpp"
 #include <math.h>
 
+#include "matx.h"
+#include "neu.h"
+
 #ifdef __arm__
 #include "motor.hpp"
 #else
