@@ -103,14 +103,6 @@ static void findSquares( const Mat& image, vector<vector<Point> >& squares )
 {
     squares.clear();
 
-//s    Mat pyr, timg, gray0(image.size(), CV_8U), gray;
-
-    // down-scale and upscale the image to filter out the noise
-    //pyrDown(image, pyr, Size(image.cols/2, image.rows/2));
-    //pyrUp(pyr, timg, image.size());
-
-
-    // blur will enhance edge detection
     Mat timg(image);
     medianBlur(image, timg, 3);
     cvtColor(timg, timg, CV_BGR2GRAY);
@@ -119,10 +111,6 @@ static void findSquares( const Mat& image, vector<vector<Point> >& squares )
 
     threshold(timg, timg,70,255,THRESH_BINARY_INV);
 
-
-
-    //imshow("test", timg);
-    // find contours and store them all as a list
     findContours(timg, contours, RETR_LIST, CHAIN_APPROX_SIMPLE);
 
     vector<Point> approx;
@@ -159,8 +147,6 @@ static void findSquares( const Mat& image, vector<vector<Point> >& squares )
             if( maxCosine < 0.3 )
                 squares.push_back(approx);
         }
-
-
     }
     if(squares.size()!=0) {
         sort(squares.begin(), squares.end(), mySortArea);
@@ -201,8 +187,6 @@ Mat pers_corr(Mat image, const vector<vector<Point> >& squares){
 
         h = getPerspectiveTransform(src_2f, warped_dst);
     }
-
-    //cout << h << h.empty() << "\n";
     if (h.empty()!=1) {
         warpPerspective(image, fixed, h, Size(400,400));
         fixed=reSize(fixed);
@@ -222,7 +206,6 @@ static void drawSquares( Mat& image, const vector<vector<Point> >& squares )
         if (p-> x > 3 && p->y > 3)
             polylines(image, &p, &n, 1, true, Scalar(0,255,0), 1, LINE_AA);
     }
-
     //imshow("features", image);
 }
 
@@ -348,7 +331,13 @@ int CV_motor_control(VideoCapture &stream1){
     int point1;
     int speed = 150;
 
+    cout <<"Setting up motors....";
     MotorInit();
+    cout <<"done\n";
+
+    cout <<"Setting up NN....";
+    //NNinit();
+    cout <<"done\n";
 
     //Video from camera
     if(!stream1.isOpened()) {
