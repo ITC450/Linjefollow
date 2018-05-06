@@ -164,7 +164,6 @@ struct sortX {
 } mySortX;
 
 Mat pers_corr(Mat image, const vector<vector<Point> >& squares){
-    static int filename=1;
     Mat fixed;
     Mat h;
     vector<Point2f> warped_dst;
@@ -198,8 +197,14 @@ Mat pers_corr(Mat image, const vector<vector<Point> >& squares){
     return image;
 }
 
-static void drawSquares( Mat& image, const vector<vector<Point> >& squares )
-{
+Mat scan(Mat image){
+    Mat features=image.clone();
+    vector<vector<Point> > squares;
+
+    findSquares(features, squares);
+    cout << "Number of squares: " << squares.size() << "\n";
+    features=pers_corr(features,squares);
+    //Draw squares
     for( size_t i = 0; i < squares.size(); i++ )
     {
         const Point* p = &squares[i][0];
@@ -209,16 +214,6 @@ static void drawSquares( Mat& image, const vector<vector<Point> >& squares )
         if (p-> x > 3 && p->y > 3)
             polylines(image, &p, &n, 1, true, Scalar(0,255,0), 1, LINE_AA);
     }
-    //imshow("features", image);
-}
-
-Mat scan(Mat image){
-    Mat features=image.clone();
-    vector<vector<Point> > squares;
-    findSquares(features, squares);
-    cout << squares.size() << "\n";
-    features=pers_corr(features,squares);
-    drawSquares(image, squares);
     return features;
 }
 
