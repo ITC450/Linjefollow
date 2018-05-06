@@ -12,8 +12,8 @@
 #include "opencv2/highgui/highgui.hpp"
 #include <math.h>
 
-#include "matx.h"
-#include "neu.h"
+//#include "matx.h"
+//#include "neu.h"
 
 #ifdef __arm__
 #include "motor.hpp"
@@ -102,7 +102,7 @@ struct sortArea {
     bool operator() (vector<Point> pt1, vector<Point> pt2) { return (contourArea(pt1,false) > contourArea(pt2, false));}
 } mySortArea;
 
-static void findSquares( const Mat& image, vector<vector<Point> >& squares )
+static void findSquares( const Mat& image, vector<vector<Point>> &squares )
 {
     squares.clear();
 
@@ -163,7 +163,7 @@ struct sortX {
     bool operator() (cv::Point2f pt1, cv::Point2f pt2) { return (pt1.x < pt2.x);}
 } mySortX;
 
-Mat pers_corr(Mat image, const vector<vector<Point> >& squares){
+Mat pers_corr(Mat image, const vector<vector<Point>> &squares){
     Mat fixed;
     Mat h;
     vector<Point2f> warped_dst;
@@ -199,7 +199,7 @@ Mat pers_corr(Mat image, const vector<vector<Point> >& squares){
 
 Mat scan(Mat image){
     Mat features=image.clone();
-    vector<vector<Point> > squares;
+    vector<vector<Point>> squares;
 
     findSquares(features, squares);
     cout << "Number of squares: " << squares.size() << "\n";
