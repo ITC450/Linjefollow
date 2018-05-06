@@ -1,11 +1,16 @@
-//better use cstdio and cstdlib to replace stdio.h and stdlib.h in c++
 #include <cstdio>
 #include <cstdlib>
 #include <iostream>
 #include <time.h>
+#include <string.h>
+#include <unistd.h>
 
 #include <opencv2/opencv.hpp>
 #include <opencv2/aruco.hpp>
+#include "opencv2/core/core.hpp"
+#include "opencv2/imgproc/imgproc.hpp"
+#include "opencv2/highgui/highgui.hpp"
+#include <math.h>
 
 #ifdef __arm__
 #include "motor.hpp"
@@ -40,6 +45,16 @@ Mat pre_proc(Mat mat, int y_akse, int x_akse, int slice){
     return Bund;
 }
 
+//Function for resizeing Mats
+Mat reSize(Mat input){
+    Mat output;
+    Size size(20,20);//the dst image size,e.g.100x100
+    resize(input,output,size);//resize image
+    Rect firkant = Rect(2,2,16,16);
+    output=output(firkant);
+    return output;
+}
+
 //Distance estimater
 int distEsti(std::vector<std::vector<cv::Point2f>> corners){
     int dist,focal=500;
@@ -71,7 +86,155 @@ int focal(std::vector<std::vector<cv::Point2f>> corners){
     return focal;
 }
 
+static double angle( Point pt1, Point pt2, Point pt0 )
+{
+    double dx1 = pt1.x - pt0.x;
+    double dy1 = pt1.y - pt0.y;
+    double dx2 = pt2.x - pt0.x;
+    double dy2 = pt2.y - pt0.y;
+    return (dx1*dx2 + dy1*dy2)/sqrt((dx1*dx1 + dy1*dy1)*(dx2*dx2 + dy2*dy2) + 1e-10);
+}
 
+struct sortArea {
+    bool operator() (vector<Point> pt1, vector<Point> pt2) { return (contourArea(pt1,false) > contourArea(pt2, false));}
+} mySortArea;
+
+static void findSquares( const Mat& image, vector<vector<Point> >& squares )
+{
+    squares.clear();
+
+//s    Mat pyr, timg, gray0(image.size(), CV_8U), gray;
+
+    // down-scale and upscale the image to filter out the noise
+    //pyrDown(image, pyr, Size(image.cols/2, image.rows/2));
+    //pyrUp(pyr, timg, image.size());
+
+
+    // blur will enhance edge detection
+    Mat timg(image);
+    medianBlur(image, timg, 3);
+    cvtColor(timg, timg, CV_BGR2GRAY);
+
+    vector<vector<Point> > contours;
+
+    threshold(timg, timg,70,255,THRESH_BINARY_INV);
+
+
+
+    //imshow("test", timg);
+    // find contours and store them all as a list
+    findContours(timg, contours, RETR_LIST, CHAIN_APPROX_SIMPLE);
+
+    vector<Point> approx;
+
+    // test each contour
+    for( size_t i = 0; i < contours.size(); i++ )
+    {
+        // approximate contour with accuracy proportional
+        // to the contour perimeter
+        approxPolyDP(Mat(contours[i]), approx, arcLength(Mat(contours[i]), true)*0.02, true);
+
+        // square contours should have 4 vertices after approximation
+        // relatively large area (to filter out noisy contours)
+        // and be convex.
+        // Note: absolute value of an area is used because
+        // area may be positive or negative - in accordance with the
+        // contour orientation
+        if( approx.size() == 4 &&
+            fabs(contourArea(Mat(approx))) > 1000 &&
+            isContourConvex(Mat(approx)) )
+        {
+            double maxCosine = 0;
+
+            for( int j = 2; j < 5; j++ )
+            {
+                // find the maximum cosine of the angle between joint edges
+                double cosine = fabs(angle(approx[j%4], approx[j-2], approx[j-1]));
+                maxCosine = MAX(maxCosine, cosine);
+            }
+
+            // if cosines of all angles are small
+            // (all angles are ~90 degree) then write quandrange
+            // vertices to resultant sequence
+            if( maxCosine < 0.3 )
+                squares.push_back(approx);
+        }
+
+
+    }
+    if(squares.size()!=0) {
+        sort(squares.begin(), squares.end(), mySortArea);
+    }
+}
+
+struct sortY {
+    bool operator() (cv::Point2f pt1, cv::Point2f pt2) { return (pt1.y < pt2.y);}
+} mySortY;
+struct sortX {
+    bool operator() (cv::Point2f pt1, cv::Point2f pt2) { return (pt1.x < pt2.x);}
+} mySortX;
+
+Mat pers_corr(Mat image, const vector<vector<Point> >& squares){
+    static int filename=1;
+    Mat fixed;
+    Mat h;
+    vector<Point2f> warped_dst;
+    vector<Point2f> src_2f;
+    warped_dst.clear();
+    src_2f.clear();
+
+    warped_dst.push_back(Point2f(0,0));
+    warped_dst.push_back(Point2f(399,0));
+    warped_dst.push_back(Point2f(0,399));
+    warped_dst.push_back(Point2f(399,399));
+
+    if (squares.size()>0){
+
+        src_2f.push_back(Point2f(squares[0][0]));
+        src_2f.push_back(Point2f(squares[0][1]));
+        src_2f.push_back(Point2f(squares[0][2]));
+        src_2f.push_back(Point2f(squares[0][3]));
+
+        std::sort(src_2f.begin(),src_2f.end(),mySortY);
+        std::sort(src_2f.begin(),src_2f.begin()+2,mySortX);
+        std::sort(src_2f.begin()+2,src_2f.end(),mySortX);
+
+        h = getPerspectiveTransform(src_2f, warped_dst);
+    }
+
+    //cout << h << h.empty() << "\n";
+    if (h.empty()!=1) {
+        warpPerspective(image, fixed, h, Size(400,400));
+        fixed=reSize(fixed);
+        return fixed;
+    }
+    return image;
+}
+
+static void drawSquares( Mat& image, const vector<vector<Point> >& squares )
+{
+    for( size_t i = 0; i < squares.size(); i++ )
+    {
+        const Point* p = &squares[i][0];
+
+        int n = (int)squares[i].size();
+        //dont detect the border
+        if (p-> x > 3 && p->y > 3)
+            polylines(image, &p, &n, 1, true, Scalar(0,255,0), 1, LINE_AA);
+    }
+
+    //imshow("features", image);
+}
+
+Mat scan(Mat image){
+    Mat features=image.clone();
+    vector<vector<Point> > squares;
+    findSquares(features, squares);
+    cout << squares.size() << "\n";
+    features=pers_corr(features,squares);
+    drawSquares(image, squares);
+    return features;
+}
 
 //Finds the center of mass of a Mat and draws it on a given Mat
 int vej_foelger(Mat cameraFrame,int rows,int cols, int slice){
@@ -123,27 +286,6 @@ int vej_foelger(Mat cameraFrame,int rows,int cols, int slice){
     circle( Bund, mc, 4, Scalar(255,255,255), 1, 8, 0 );
 
     return afvigelse;
-}
-
-//Detect signs
-vector<int>  objekt_genkendelse(Mat cameraFrame){
-    std::vector<int> ids;
-    cv::Ptr<cv::aruco::Dictionary> dictionary = cv::aruco::getPredefinedDictionary(cv::aruco::DICT_4X4_50);
-    std::vector<std::vector<cv::Point2f>> corners;
-    int estimate;
-    string text;
-
-    aruco::detectMarkers(cameraFrame, dictionary, corners, ids);
-    if (ids.size() > 0) {
-        cv::aruco::drawDetectedMarkers(cameraFrame, corners, ids);
-/*        estimate = distEsti(corners);
-        //estimate=focal(corners);
-        text = to_string(estimate);
-        putText(cameraFrame, "Dist: ", cvPoint(30, 30), FONT_HERSHEY_SIMPLEX, 0.8, cvScalar(200, 200, 250), 1,
-                CV_AA);
-        putText(cameraFrame, text, cvPoint(85, 30), FONT_HERSHEY_SIMPLEX, 0.8, cvScalar(200, 200, 250), 1, CV_AA);*/
-    }
-    return ids;
 }
 
 //General motor control unit
@@ -219,6 +361,7 @@ int CV_motor_control(VideoCapture &stream1){
 
     //Setup mat for source frame and insert feed into mat
     Mat cameraFrame;
+    Mat sign;
     stream1 >> cameraFrame;
     //Gets the resolution of the feed
     cout << "Resolution: " << '\n';
@@ -238,9 +381,10 @@ int CV_motor_control(VideoCapture &stream1){
 
         point1 = vej_foelger(cameraFrame, rows, cols, 8);
 
-        id = objekt_genkendelse(cameraFrame);
+        sign=scan(cameraFrame);
+        //id=NN(sign);
 
-        motor_kontrol_enhed(id, cameraFrame, rows, cols, speed, point1, status);
+        //motor_kontrol_enhed(id, cameraFrame, rows, cols, speed, point1, status);
 
         //UI, bottom half
         rectangle( cameraFrame,Point(0,rows*0.875),Point(cols-1,rows-1),Scalar( 0, 255, 0 ),1);
