@@ -104,6 +104,7 @@ struct sortArea {
 
 static void findSquares( const Mat& image, vector<vector<Point>> &squares )
 {
+    //https://github.com/alyssaq/opencv/blob/master/squares.cpp
     squares.clear();
 
     Mat timg(image);
