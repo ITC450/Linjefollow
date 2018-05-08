@@ -338,7 +338,8 @@ void data_conv(Mat picture, matrix *m1) {
 int CV_motor_control(VideoCapture &stream1){
     //Init/setup
     vector<int> id;
-    int status;
+    id.push_back(-1);
+    int status{-1};
     int point1;
     int speed = 150;
     vector<vector<Point>> squares;
@@ -397,15 +398,14 @@ int CV_motor_control(VideoCapture &stream1){
             data_conv(sign, m1);
             matnormpext(m1, &normmat, uext, 1);
             bpe_forward(normmat, nn_net, &nn_out);
-            int status{0};
             float value{.0};
             for (int k = 0; k < 9; k++) {
                 if (value < elm(nn_out, k, 0)) {
                     value = elm(nn_out, k, 0);
-                    status = k;
+                    id[0] = k;
                 }
             }
-            cout << "Status: " << status << "\n";
+            cout << "Status: " << id[0] << "\n";
         }
 
         motor_kontrol_enhed(id, cameraFrame, rows, cols, speed, point1, status);
