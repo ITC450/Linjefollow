@@ -10,9 +10,9 @@ find_package( OpenCV REQUIRED )
 set(SOURCE_FILES main.cpp)
 
 IF(${CMAKE_SYSTEM_PROCESSOR} MATCHES "arm")
-add_executable(Linjefollow main.cpp motor.cpp motor.hpp)
+add_executable(Linjefollow main.cpp motor.cpp motor.hpp neu.h matx.h neu.cpp matlib.cpp)
 ELSE(${CMAKE_SYSTEM_PROCESSOR} MATCHES "arm")
-add_executable(Linjefollow main.cpp motor_virt.cpp motor_virt.hpp)
+add_executable(Linjefollow main.cpp motor_virt.cpp motor_virt.hpp neu.h matx.h neu.cpp matlib.cpp)
 ENDIF(${CMAKE_SYSTEM_PROCESSOR} MATCHES "arm")
 
 include_directories(${OpenCV_INCLUDE_DIRS})
