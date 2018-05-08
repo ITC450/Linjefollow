@@ -8,6 +8,7 @@
 #define errDist(err) (0.0004309*err-0.007083)
 #define Q 0.168
 #define AKSEL 0.12
+#define PI 3.14159265
 
 using namespace cv;
 

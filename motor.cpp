@@ -44,7 +44,8 @@ void RightMotor(direction dir, int speed, Mat mat, int rows, int cols) {
 }
 
 double radius(double error){
-  double r = (pow(Q,2)+pow(error,2))/(8*error);
+  double v = atan(error/Q);
+  double r = -(sqrt(pow(Q,2)+pow(error,2)))/(2*sin((-PI/2)+2*abs(v)));
   return r;
 }
 
@@ -54,6 +55,7 @@ int pwmSpeed(double v){
 }
 
 double highV(double speed, double radius){
+
   double hv =(speed*(AKSEL + 2*radius))/(2*radius);
   return hv;
 }
