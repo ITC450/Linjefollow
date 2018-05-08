@@ -193,17 +193,17 @@ Mat pers_corr(Mat image, const vector<vector<Point>> &squares){
     if (h.empty()!=1) {
         warpPerspective(image, fixed, h, Size(400,400));
         fixed=reSize(fixed);
+        cvtColor(fixed, fixed, CV_BGR2GRAY);
         return fixed;
     }
     return image;
 }
 
-Mat scan(Mat image){
+Mat scan(Mat image, vector<vector<Point>> &squares){
     Mat features=image.clone();
-    vector<vector<Point>> squares;
 
     findSquares(features, squares);
-    cout << "Number of squares: " << squares.size() << "\n";
+    //cout << "Number of squares: " << squares.size() << "\n";
     features=pers_corr(features,squares);
     //Draw squares
     for( size_t i = 0; i < squares.size(); i++ )
@@ -289,23 +289,23 @@ void motor_kontrol_enhed(vector<int> ids, Mat cameraFrame, int rows, int cols, i
                     std::cout << "Case 1 - Stop motor" << '\n';
                     break;
                     //Slow
-                case 2:
+                case 5:
                     speed = 100;
                     std::cout << "Case 2 - Speed = 50" << '\n';
                     break;
                     //Fast
-                case 3:
+                case 7:
                     speed = 200;
                     std::cout << "Case 3 - Speed = 100" << '\n';
                     break;
                     //Left
-                case 4:
+/*                case 4:
                     std::cout << "Case 4 - TBD" << '\n';
                     break;
                     //Right
                 case 5:
                     std::cout << "Case 5 - TBD" << '\n';
-                    break;
+                    break;*/
                 default:
                     RightMotor(FORWARD, 0, cameraFrame, rows, cols);
                     LeftMotor(FORWARD, 0, cameraFrame, rows, cols);
@@ -323,14 +323,17 @@ void motor_kontrol_enhed(vector<int> ids, Mat cameraFrame, int rows, int cols, i
     }
 }
 
-void data_conv(Mat picture, matrix *m1){
-    int i=0;
-    int x{0},y{0};
-    for (int x = 0; x < picture.rows; x++)
-            for (int y = 0; y < picture.cols; y++)
-                elm(m1,i,0)=picture.at<uchar>(x, y);
-                i++;
+void data_conv(Mat picture, matrix *m1) {
+    int i = 0;
+    int x{0}, y{0};
+    for (int x = 0; x < picture.rows; x++) {
+        for (int y = 0; y < picture.cols; y++) {
+            elm(m1, i, 0) = picture.at<uchar>(x, y);
+            i++;
+        }
+    }
 }
+
 
 int CV_motor_control(VideoCapture &stream1){
     //Init/setup
@@ -338,6 +341,7 @@ int CV_motor_control(VideoCapture &stream1){
     int status;
     int point1;
     int speed = 150;
+    vector<vector<Point>> squares;
 
     cout <<"Setting up motors....";
     MotorInit();
@@ -388,15 +392,23 @@ int CV_motor_control(VideoCapture &stream1){
 
         point1 = vej_foelger(cameraFrame, rows, cols, 8);
 
-        sign=scan(cameraFrame);
-        data_conv(sign,m1);
-        matnormpext(m1,&normmat,uext,1);
-        bpe_forward(normmat,nn_net,&nn_out);
-        for (int k = 0; k <9; k++){
-          cout << elm(nnoutput, k, 0);
+        sign = scan(cameraFrame, squares);
+        if (squares.size() != 0) {
+            data_conv(sign, m1);
+            matnormpext(m1, &normmat, uext, 1);
+            bpe_forward(normmat, nn_net, &nn_out);
+            int status{0};
+            float value{.0};
+            for (int k = 0; k < 9; k++) {
+                if (value < elm(nn_out, k, 0)) {
+                    value = elm(nn_out, k, 0);
+                    status = k;
+                }
+            }
+            cout << "Status: " << status << "\n";
         }
 
-        //motor_kontrol_enhed(id, cameraFrame, rows, cols, speed, point1, status);
+        motor_kontrol_enhed(id, cameraFrame, rows, cols, speed, point1, status);
 
         //UI, bottom half
         rectangle( cameraFrame,Point(0,rows*0.875),Point(cols-1,rows-1),Scalar( 0, 255, 0 ),1);
