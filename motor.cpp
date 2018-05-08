@@ -1,10 +1,10 @@
 #include "motor.hpp"
 
 void MotorInit() {
-    std::cout << "Setting up WiringPi" << '\n';
+    //std::cout << "Setting up WiringPi" << '\n';
     if (wiringPiSetup() == -1)
     {
-        std::cout << "WiringPi setup failed" << '\n';
+        //std::cout << "WiringPi setup failed" << '\n';
         exit(1);
     }
     pinMode(1, PWM_OUTPUT);
