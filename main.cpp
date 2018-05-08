@@ -323,12 +323,12 @@ void motor_kontrol_enhed(vector<int> ids, Mat cameraFrame, int rows, int cols, i
     }
 }
 
-void data_conv(Mat picture, matrix &m1){
+void data_conv(Mat picture, matrix *m1){
     int i=0;
     int x{0},y{0};
     for (int x = 0; x < picture.rows; x++)
             for (int y = 0; y < picture.cols; y++)
-                elm(m1,0,i)=picture.at<uchar>(x, y));
+                elm(m1,i,0)=picture.at<uchar>(x, y);
                 i++;
 }
 
@@ -388,7 +388,7 @@ int CV_motor_control(VideoCapture &stream1){
         point1 = vej_foelger(cameraFrame, rows, cols, 8);
 
         sign=scan(cameraFrame);
-        m1=data_conv(sign,m1);
+        data_conv(sign,m1);
 
         //id=NN(sign);
 
