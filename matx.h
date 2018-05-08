@@ -12,12 +12,12 @@ typedef struct
     int *rowoffset;
 } matrix;
 
-typedef struct
+/*typedef struct
 {
     int rows;
     float *vaerdi;
 } vector;
-
+*/
 void Error(int n);
 
 void
@@ -116,4 +116,3 @@ char
 randinitmat(matrix **mat, int row, int col, float min, float max);
 
 char ShuffleMat(matrix *mat1, matrix *mat2, matrix *tmp);
-
