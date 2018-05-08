@@ -350,17 +350,17 @@ int CV_motor_control(VideoCapture &stream1){
 
     cout <<"Setting up NN........";
     matrix *m1;
-    initmat(&m1,256,1,0.0);
+    initmat(&m1,256,1,0.0); //Vektor til input billed
 
     mlp_net *nn_net;
     matrix *uext, *nn_out, *normmat;
-    int neu = 10;
-    int input = 256;
-    int output = 9;
-    load_bpenet("DataNet.nn", &nn_net, &input, &neu, &output);
-    loadMatD("uext", &uext);
-    initmat(&nn_out, 9, 1, 0.0);
-    initmat(&normmat, 256, 1, 0.0);
+    int neu = 10;                                              //Antal neuroner
+    int input = 256;                                           //Antal input til netværket
+    int output = 9;                                            //Antal output fra netværket
+    load_bpenet("DataNet.nn", &nn_net, &input, &neu, &output); //Netværk læses ind
+    loadMatD("uext", &uext);                                   //Mormereings værdier læses ind
+    initmat(&normmat, 256, 1, 0.0);                            //Vektor til normering af billed
+    initmat(&nn_out, 9, 1, 0.0);                               //Vektor til output fra det neurale netværk
     cout <<"done\n";
 
     //Video from camera
@@ -395,9 +395,9 @@ int CV_motor_control(VideoCapture &stream1){
 
         sign = scan(cameraFrame, squares);
         if (squares.size() != 0) {
-            data_conv(sign, m1);
-            matnormpext(m1, &normmat, uext, 1);
-            bpe_forward(normmat, nn_net, &nn_out);
+            data_conv(sign, m1);                            //Konvertering fra Mat til matrix
+            matnormpext(m1, &normmat, uext, 1);             //Normering af data
+            bpe_forward(normmat, nn_net, &nn_out);          //Afvikling feed forward netværk
             float value{.0};
             for (int k = 0; k < 9; k++) {
                 if (value < elm(nn_out, k, 0)) {
