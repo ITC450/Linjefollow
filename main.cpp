@@ -336,6 +336,7 @@ int CV_motor_control(VideoCapture &stream1){
 
     cout <<"Setting up NN........";
     //NNinit();
+    //initmat(&m1,256,1,0.0);
     cout <<"done\n";
 
     //Video from camera
