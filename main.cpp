@@ -348,13 +348,14 @@ int CV_motor_control(VideoCapture &stream1){
     initmat(&m1,256,1,0.0);
 
     mlp_net *nn_net;
-    matrix *uext, *nn_out;
+    matrix *uext, *nn_out, *normmat;
     int neu = 10;
     int input = 256;
     int output = 9;
     load_bpenet("DataNet.nn", &nn_net, &input, &neu, &output);
     loadMatD("uext", &uext);
     initmat(&nn_out, 9, 1, 0.0);
+    initmat(&normmat, 256, 1, 0.0);
     cout <<"done\n";
 
     //Video from camera
@@ -389,8 +390,11 @@ int CV_motor_control(VideoCapture &stream1){
 
         sign=scan(cameraFrame);
         data_conv(sign,m1);
-
-        //id=NN(sign);
+        matnormpext(m1,&normmat,uext,1);
+        bpe_forward(normmat,nn_net,&nn_out);
+        for (int k = 0; k <9; k++){
+          cout << elm(nnoutput, k, 0);
+        }
 
         //motor_kontrol_enhed(id, cameraFrame, rows, cols, speed, point1, status);
 
