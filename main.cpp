@@ -12,8 +12,8 @@
 #include "opencv2/highgui/highgui.hpp"
 #include <math.h>
 
-//#include "matx.h"
-//#include "neu.h"
+#include "matx.h"
+#include "neu.h"
 
 #ifdef __arm__
 #include "motor.hpp"
@@ -323,6 +323,14 @@ void motor_kontrol_enhed(vector<int> ids, Mat cameraFrame, int rows, int cols, i
     }
 }
 
+void data_conv(matrix &m1){
+  int i=0;
+  for (int x = 0; x < picture.rows; x++)
+            for (int y = 0; y < picture.cols; y++)
+                elm(m1,0,i)= picture.at<uchar>(x, y));
+                i++;
+}
+
 int CV_motor_control(VideoCapture &stream1){
     //Init/setup
     vector<int> id;
@@ -336,7 +344,8 @@ int CV_motor_control(VideoCapture &stream1){
 
     cout <<"Setting up NN........";
     //NNinit();
-    //initmat(&m1,256,1,0.0);
+    matrix *m1;
+    initmat(&m1,256,1,0.0);
     cout <<"done\n";
 
     //Video from camera
@@ -371,6 +380,7 @@ int CV_motor_control(VideoCapture &stream1){
         point1 = vej_foelger(cameraFrame, rows, cols, 8);
 
         sign=scan(cameraFrame);
+        m1=data_conv(sign);
         //id=NN(sign);
 
         //motor_kontrol_enhed(id, cameraFrame, rows, cols, speed, point1, status);
