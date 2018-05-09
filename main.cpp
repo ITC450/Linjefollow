@@ -2,7 +2,8 @@
 #include <cstdio>
 #include <cstdlib>
 #include <iostream>
-#include <time.h>
+#include <ctime>
+#include <chrono>
 
 #include <opencv2/opencv.hpp>
 #include <opencv2/aruco.hpp>
@@ -146,8 +147,14 @@ vector<int>  objekt_genkendelse(Mat cameraFrame){
     return ids;
 }
 
+void fps_counter(std::chrono::time_point<std::chrono::high_resolution_clock> start, int frames){
+    auto end = std::chrono::system_clock::now();
+    std::chrono::duration<double> elapsed_seconds = end-start;
+    std::cout << "Average fps: " << frames/elapsed_seconds.count() << "\n";
+}
+
 //General motor control unit
-void motor_kontrol_enhed(vector<int> ids, Mat cameraFrame, int rows, int cols, int &speed, int point, int &status){
+void motor_kontrol_enhed(vector<int> ids, Mat cameraFrame, int rows, int cols, int &speed, int point, int &status, std::chrono::time_point<std::chrono::high_resolution_clock> start, int frames){
 
     if (ids.size() > 0) {
         if (ids[0] != status) {
@@ -157,6 +164,7 @@ void motor_kontrol_enhed(vector<int> ids, Mat cameraFrame, int rows, int cols, i
                     RightMotor(BACK, 0, cameraFrame, rows, cols);
                     LeftMotor(BACK, 0, cameraFrame, rows, cols);
                     std::cout << "Case 0 - Exit program" << '\n';
+                    fps_counter(start, frames);
                     exit(0);
                     //Stop
                 case 1:
@@ -205,6 +213,7 @@ int CV_motor_control(VideoCapture &stream1){
     int status;
     int point1;
     int speed = 150;
+    int frames{0};
 
     MotorInit();
 
@@ -227,6 +236,8 @@ int CV_motor_control(VideoCapture &stream1){
     //Save as  settings
     VideoWriter video("linefollower.avi",CV_FOURCC('M','J','P','G'),30, Size(cols,rows));
 
+    auto start = std::chrono::system_clock::now();
+
     while (true) {
         //Insert feed into frame mat
         stream1 >> cameraFrame;
@@ -239,8 +250,8 @@ int CV_motor_control(VideoCapture &stream1){
         point1 = vej_foelger(cameraFrame, rows, cols, 8);
 
         id = objekt_genkendelse(cameraFrame);
-
-        motor_kontrol_enhed(id, cameraFrame, rows, cols, speed, point1, status);
+        frames++;
+        motor_kontrol_enhed(id, cameraFrame, rows, cols, speed, point1, status, start, frames);
 
         //UI, bottom half
         rectangle( cameraFrame,Point(0,rows*0.875),Point(cols-1,rows-1),Scalar( 0, 255, 0 ),1);
