@@ -56,10 +56,10 @@ double pid(int err, std::chrono::time_point<std::chrono::high_resolution_clock> 
     double Pout = kp * err; // P delen udregnes
   //  auto end = std::chrono::high_resolution_clock::now();
     //auto result = std::chrono::duration_cast<std::chrono::microseconds>(end-start);
-    inte +=  err * dur;  // I delen udregnes
+    inte +=  err * dur.count();  // I delen udregnes
   //  start = std::chrono::high_resolution_clock::now();
     double Iout = ki * inte;
-    double derivative = (err - last_err)/dur;
+    double derivative = (err - last_err)/dur.count();
     double Dout = kd * derivative;
 
     double output = Pout + Dout ;//+ Iout;
