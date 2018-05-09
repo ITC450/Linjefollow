@@ -154,7 +154,7 @@ void fps_counter(std::chrono::time_point<std::chrono::high_resolution_clock> sta
 }
 
 //General motor control unit
-void motor_kontrol_enhed(vector<int> ids, Mat cameraFrame, int rows, int cols, int &speed, int point, int &status, std::chrono::time_point<std::chrono::high_resolution_clock> start, int &frames){
+void motor_kontrol_enhed(vector<int> ids, Mat cameraFrame, int rows, int cols, int &speed, int point, int &status, std::chrono::time_point<std::chrono::high_resolution_clock> start, int &frames, std::chrono::time_point<std::chrono::high_resolution_clock> &pid_start){
 
     if (ids.size() > 0) {
         if (ids[0] != status) {
@@ -203,7 +203,7 @@ void motor_kontrol_enhed(vector<int> ids, Mat cameraFrame, int rows, int cols, i
     }
 
     if (status != 1) {
-        MotorFollowLine(point, cameraFrame, rows, cols, speed);
+        MotorFollowLine(point, cameraFrame, rows, cols, speed, pid_start);
     }
 }
 
@@ -237,7 +237,7 @@ int CV_motor_control(VideoCapture &stream1){
     VideoWriter video("linefollower.avi",CV_FOURCC('M','J','P','G'),30, Size(cols,rows));
 
     auto start = std::chrono::system_clock::now();
-
+    auto pid_start = std::chrono::system_clock::now();
     while (true) {
         //Insert feed into frame mat
         stream1 >> cameraFrame;
@@ -251,7 +251,7 @@ int CV_motor_control(VideoCapture &stream1){
 
         id = objekt_genkendelse(cameraFrame);
         frames++;
-        motor_kontrol_enhed(id, cameraFrame, rows, cols, speed, point1, status, start, frames);
+        motor_kontrol_enhed(id, cameraFrame, rows, cols, speed, point1, status, start, frames, pid_start);
 
         //UI, bottom half
         rectangle( cameraFrame,Point(0,rows*0.875),Point(cols-1,rows-1),Scalar( 0, 255, 0 ),1);
