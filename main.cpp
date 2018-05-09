@@ -400,7 +400,7 @@ int CV_motor_control(VideoCapture &stream1){
             bpe_forward(normmat, nn_net, &nn_out);          //Afvikling feed forward netværk
             float value{.0};
             for (int k = 0; k < 9; k++) {
-                if (value < elm(nn_out, k, 0) && elm(nn_out, k, 0) > 0.5) {
+                if (value < elm(nn_out, k, 0) && elm(nn_out, k, 0) > 0.8) {
                     value = elm(nn_out, k, 0);
                     id[0] = k;
                 }
