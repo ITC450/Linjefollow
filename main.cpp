@@ -273,7 +273,7 @@ int vej_foelger(Mat cameraFrame,int rows,int cols, int slice){
 //General motor control unit
 void motor_kontrol_enhed(vector<int> ids, Mat cameraFrame, int rows, int cols, int &speed, int point, int &status){
 
-    if (ids.size() > 0) {
+    if (ids[0] >= 0) {
         if (ids[0] == status && ids[1] == 2) {
             switch (ids[0]) {
                 //Kill
@@ -411,6 +411,7 @@ int CV_motor_control(VideoCapture &stream1){
             matnormpext(m1, &normmat, uext, 1);             //Normering af data
             bpe_forward(normmat, nn_net, &nn_out);          //Afvikling feed forward netværk
             float value{.0};
+            id[0] = -1;
             for (int k = 0; k < 9; k++) {
                 if (value < elm(nn_out, k, 0) && elm(nn_out, k, 0) > 0.8) {
                     value = elm(nn_out, k, 0);
@@ -419,6 +420,7 @@ int CV_motor_control(VideoCapture &stream1){
             }
             if (id[0] == status)id[1]++;
             else id[1]=0;
+            if (id[1] > 2)id[1]=3;
 
             cout << "Status: " << id[0] << "\n";
             cout << "Count up: " << id[1] << '\n';
