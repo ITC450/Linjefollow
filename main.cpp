@@ -406,12 +406,12 @@ int CV_motor_control(VideoCapture &stream1){
         point1 = vej_foelger(cameraFrame, rows, cols, 8);
 
         sign = scan(cameraFrame, squares);
+        id[0] = -1;
         if (squares.size() != 0) {
             data_conv(sign, m1);                            //Konvertering fra Mat til matrix
             matnormpext(m1, &normmat, uext, 1);             //Normering af data
             bpe_forward(normmat, nn_net, &nn_out);          //Afvikling feed forward netværk
             float value{.0};
-            id[0] = -1;
             for (int k = 0; k < 9; k++) {
                 if (value < elm(nn_out, k, 0) && elm(nn_out, k, 0) > 0.8) {
                     value = elm(nn_out, k, 0);
