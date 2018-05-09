@@ -147,14 +147,14 @@ vector<int>  objekt_genkendelse(Mat cameraFrame){
     return ids;
 }
 
-void fps_counter(std::chrono::time_point<std::chrono::high_resolution_clock> start, int frames){
+void fps_counter(std::chrono::time_point<std::chrono::high_resolution_clock> start, int &frames){
     auto end = std::chrono::system_clock::now();
     std::chrono::duration<double> elapsed_seconds = end-start;
     std::cout << "Average fps: " << frames/elapsed_seconds.count() << "\n";
 }
 
 //General motor control unit
-void motor_kontrol_enhed(vector<int> ids, Mat cameraFrame, int rows, int cols, int &speed, int point, int &status, std::chrono::time_point<std::chrono::high_resolution_clock> start, int frames){
+void motor_kontrol_enhed(vector<int> ids, Mat cameraFrame, int rows, int cols, int &speed, int point, int &status, std::chrono::time_point<std::chrono::high_resolution_clock> start, int &frames){
 
     if (ids.size() > 0) {
         if (ids[0] != status) {
