@@ -289,23 +289,34 @@ void motor_kontrol_enhed(vector<int> ids, Mat cameraFrame, int rows, int cols, i
                     std::cout << "Case 1 - Stop motor" << '\n';
                     break;
                     //Slow
+                case 2:
+                    speed = 100;
+                    std::cout << "Case 2 - Ligeud" << '\n';
+                    break;
+
+                case 3:
+                    std::cout << "Case 3 - Højre" << '\n';
+                    break;
+
+                case 4:
+                    std::cout << "Case 4 - Venstre" << '\n';
+                    break;
+
                 case 5:
                     speed = 100;
-                    std::cout << "Case 2 - Speed = 50" << '\n';
+                    std::cout << "Case 5 - 10" << '\n';
                     break;
                     //Fast
-                case 7:
+                case 6:
                     speed = 200;
-                    std::cout << "Case 3 - Speed = 100" << '\n';
+                    std::cout << "Case 6 - 30" << '\n';
                     break;
                     //Left
-/*                case 4:
-                    std::cout << "Case 4 - TBD" << '\n';
+                case 7:
+                    speed = 300;
+                    std::cout << "Case 7 - 50" << '\n';
                     break;
                     //Right
-                case 5:
-                    std::cout << "Case 5 - TBD" << '\n';
-                    break;*/
                 default:
                     RightMotor(FORWARD, 0, cameraFrame, rows, cols);
                     LeftMotor(FORWARD, 0, cameraFrame, rows, cols);

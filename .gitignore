@@ -1,3 +1,8 @@
+*.txt
+
+*.nn
+
+uext
 
 cmake-build-debug/
 
