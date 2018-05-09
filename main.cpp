@@ -280,13 +280,13 @@ void motor_kontrol_enhed(vector<int> ids, Mat cameraFrame, int rows, int cols, i
                 case 0:
                     RightMotor(BACK, 0, cameraFrame, rows, cols);
                     LeftMotor(BACK, 0, cameraFrame, rows, cols);
-                    std::cout << "Case 0 - Exit program" << '\n';
+                    std::cout << "Case 0 - Stopskilt" << '\n';
                     exit(0);
                     //Stop
                 case 1:
                     RightMotor(FORWARD, 0, cameraFrame, rows, cols);
                     LeftMotor(FORWARD, 0, cameraFrame, rows, cols);
-                    std::cout << "Case 1 - Stop motor" << '\n';
+                    std::cout << "Case 1 - Parkeringsskilt" << '\n';
                     break;
                     //Slow
                 case 2:
@@ -371,8 +371,8 @@ int CV_motor_control(VideoCapture &stream1){
     int output = 9;                                            //Antal output fra netværket
     load_bpenet("DataNet.nn", &nn_net, &input, &neu, &output); //Netværk læses ind
     loadMatD("uext", &uext);                                   //Mormereings værdier læses ind
-    initmat(&normmat, 256, 1, 0.0);                            //Vektor til normering af billed
-    initmat(&nn_out, 9, 1, 0.0);                               //Vektor til output fra det neurale netværk
+    initmat(&normmat, input, 1, 0.0);                            //Vektor til normering af billed
+    initmat(&nn_out, output, 1, 0.0);                               //Vektor til output fra det neurale netværk
     cout <<"done\n";
 
     //Video from camera
@@ -425,7 +425,6 @@ int CV_motor_control(VideoCapture &stream1){
             cout << "Status: " << id[0] << "\n";
             cout << "Count up: " << id[1] << '\n';
         }
-
         motor_kontrol_enhed(id, cameraFrame, rows, cols, speed, point1, status);
 
         //UI, bottom half
