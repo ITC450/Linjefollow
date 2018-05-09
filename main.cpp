@@ -274,7 +274,7 @@ int vej_foelger(Mat cameraFrame,int rows,int cols, int slice){
 void motor_kontrol_enhed(vector<int> ids, Mat cameraFrame, int rows, int cols, int &speed, int point, int &status){
 
     if (ids.size() > 0) {
-        if (ids[0] != status) {
+        if (ids[0] == status && ids[1] == 2) {
             switch (ids[0]) {
                 //Kill
                 case 0:
@@ -350,6 +350,7 @@ int CV_motor_control(VideoCapture &stream1){
     //Init/setup
     vector<int> id;
     id.push_back(-1);
+    id.push_back(0);
     int status{-1};
     int point1;
     int speed = 150;
@@ -416,7 +417,11 @@ int CV_motor_control(VideoCapture &stream1){
                     id[0] = k;
                 }
             }
+            if (id[0] == status)id[1]++;
+            else id[1]=0;
+
             cout << "Status: " << id[0] << "\n";
+            cout << "Count up: " << id[1] << '\n';
         }
 
         motor_kontrol_enhed(id, cameraFrame, rows, cols, speed, point1, status);
