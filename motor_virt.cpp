@@ -28,17 +28,18 @@ double inte = 0;
 //std::chrono::time_point end;
 int last_err = 0;
 
-double pid(int err) {
+double pid(int err, std::chrono::time_point<std::chrono::high_resolution_clock> &pid_start) {
     err -= 8;
-
-
+    auto pid_end = std::chrono::system_clock::now();
+    std::chrono::duration<double, std::milli> dur = pid_start - pid_end;
+    pid_start = std::chrono::system_clock::now();
     double Pout = kp * err; // P delen udregnes
-  //  auto end = std::chrono::high_resolution_clock::now();
+    //  auto end = std::chrono::high_resolution_clock::now();
     //auto result = std::chrono::duration_cast<std::chrono::microseconds>(end-start);
-  inte +=  err;  // I delen udregnes
-  //  start = std::chrono::high_resolution_clock::now();
+    inte +=  err * dur.count();  // I delen udregnes
+    //  start = std::chrono::high_resolution_clock::now();
     double Iout = ki * inte;
-    double derivative = (err - last_err);
+    double derivative = (err - last_err)/dur.count();
     double Dout = kd * derivative;
 
     double output = Pout + Dout ;//+ Iout;
@@ -49,19 +50,18 @@ double pid(int err) {
     return output;
 }
 
-
 //Follow line function
-void MotorFollowLine(int err, Mat mat, int rows, int cols, int speed){
-    double error = pid(err);
-    std::cout << error << "\n";
+void MotorFollowLine(int err, Mat mat, int rows, int cols, int speed, std::chrono::time_point<std::chrono::high_resolution_clock> &pid_start){
+    double error = pid(err, pid_start);
+    //std::cout << error << "\n";
     if(err < 0) {
         LeftMotor(FORWARD, speed - int(abs(error)), mat, rows, cols);
         RightMotor(FORWARD, speed + int(abs(error)), mat, rows, cols);
         return;
     }
     if(err > 0) {
-        LeftMotor(FORWARD, speed + int(abs(error)), mat, rows, cols);
         RightMotor(FORWARD, speed - int(abs(error)), mat, rows, cols);
+        LeftMotor(FORWARD, speed + int(abs(error)), mat, rows, cols);
         return;
     }
     if(err == 0) {
