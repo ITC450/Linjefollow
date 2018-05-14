@@ -60,7 +60,7 @@ Mat reSize(Mat input){
 }
 
 //Distance estimater
-int distEsti(std::vector<std::vector<cv::Point2f>> corners){
+int distEsti(vector<vector<cv::Point2f>> corners){
     int dist,focal=500;
     float arucosize=67.78;
     //float focal=(afstand til camera*pixel count)/diagonal længde;
@@ -78,7 +78,7 @@ int distEsti(std::vector<std::vector<cv::Point2f>> corners){
 }
 
 //Focal length calculater
-int focal(std::vector<std::vector<cv::Point2f>> corners){
+int focal(vector<vector<cv::Point2f>> corners){
     int dist, focal, fysDist=200;
     float arucosize=67.78;
     Point2f pt1, pt2;
@@ -185,9 +185,9 @@ Mat pers_corr(Mat image, const vector<vector<Point>> &squares){
         src_2f.push_back(Point2f(squares[0][2]));
         src_2f.push_back(Point2f(squares[0][3]));
 
-        std::sort(src_2f.begin(),src_2f.end(),mySortY);
-        std::sort(src_2f.begin(),src_2f.begin()+2,mySortX);
-        std::sort(src_2f.begin()+2,src_2f.end(),mySortX);
+        sort(src_2f.begin(),src_2f.end(),mySortY);
+        sort(src_2f.begin(),src_2f.begin()+2,mySortX);
+        sort(src_2f.begin()+2,src_2f.end(),mySortX);
 
         h = getPerspectiveTransform(src_2f, warped_dst);
     }
@@ -271,14 +271,14 @@ int vej_foelger(Mat cameraFrame,int rows,int cols, int slice){
     return afvigelse;
 }
 
-void fps_counter(std::chrono::time_point<std::chrono::high_resolution_clock> start, int &frames){
-    auto end = std::chrono::system_clock::now();
-    std::chrono::duration<double> elapsed_seconds = end-start;
-    std::cout << "Average fps: " << frames/elapsed_seconds.count() << "\n";
+void fps_counter(chrono::time_point<chrono::high_resolution_clock> start, int &frames){
+    auto end = chrono::system_clock::now();
+    chrono::duration<double> elapsed_seconds = end-start;
+    cout << "Average fps: " << frames/elapsed_seconds.count() << "\n";
 }
 
 //General motor control unit
-void motor_kontrol_enhed(vector<int> ids, Mat cameraFrame, int rows, int cols, int &speed, int point, int &status, std::chrono::time_point<std::chrono::high_resolution_clock> start, int &frames){
+void motor_kontrol_enhed(vector<int> ids, Mat cameraFrame, int rows, int cols, int &speed, int point, int &status, chrono::time_point<chrono::high_resolution_clock> start, int &frames, chrono::time_point<chrono::high_resolution_clock> &pid_start){
 
     if (ids[0] >= 0) {
         if (ids[0] == status && ids[1] == 2) {
@@ -287,42 +287,42 @@ void motor_kontrol_enhed(vector<int> ids, Mat cameraFrame, int rows, int cols, i
                 case 0:
                     RightMotor(BACK, 0, cameraFrame, rows, cols);
                     LeftMotor(BACK, 0, cameraFrame, rows, cols);
-                    std::cout << "Case 0 - Stopskilt" << '\n';
+                    cout << "Case 0 - Stopskilt" << '\n';
                     fps_counter(start, frames);
                     exit(0);
                     //Stop
                 case 1:
                     RightMotor(FORWARD, 0, cameraFrame, rows, cols);
                     LeftMotor(FORWARD, 0, cameraFrame, rows, cols);
-                    std::cout << "Case 1 - Parkeringsskilt" << '\n';
+                    cout << "Case 1 - Parkeringsskilt" << '\n';
                     break;
                     //Slow
                 case 2:
                     speed = 100;
-                    std::cout << "Case 2 - Ligeud" << '\n';
+                    cout << "Case 2 - Ligeud" << '\n';
                     break;
 
                 case 3:
-                    std::cout << "Case 3 - Højre" << '\n';
+                    cout << "Case 3 - Højre" << '\n';
                     break;
 
                 case 4:
-                    std::cout << "Case 4 - Venstre" << '\n';
+                    cout << "Case 4 - Venstre" << '\n';
                     break;
 
                 case 5:
                     speed = 100;
-                    std::cout << "Case 5 - 10" << '\n';
+                    cout << "Case 5 - 10" << '\n';
                     break;
                     //Fast
                 case 6:
                     speed = 175;
-                    std::cout << "Case 6 - 30" << '\n';
+                    cout << "Case 6 - 30" << '\n';
                     break;
                     //Left
                 case 7:
                     speed = 250;
-                    std::cout << "Case 7 - 50" << '\n';
+                    cout << "Case 7 - 50" << '\n';
                     break;
                     //Right
                 default:
@@ -338,7 +338,7 @@ void motor_kontrol_enhed(vector<int> ids, Mat cameraFrame, int rows, int cols, i
     }
 
     if (status != 1) {
-        MotorFollowLine(point, cameraFrame, rows, cols, speed);
+        MotorFollowLine(point, cameraFrame, rows, cols, speed, pid_start);
     }
 }
 
@@ -386,7 +386,7 @@ int CV_motor_control(VideoCapture &stream1){
 
     //Video from camera
     if(!stream1.isOpened()) {
-        std::cerr << "cannot open camera" << std::endl;
+        cerr << "cannot open camera" << endl;
         return -1;
     }
     //.set is for controlling size of stream and the stream mat
@@ -404,13 +404,14 @@ int CV_motor_control(VideoCapture &stream1){
     //Save as  settings
     VideoWriter video("linefollower.avi",CV_FOURCC('M','J','P','G'),30, Size(cols,rows));
 
-    auto start = std::chrono::system_clock::now();
+    auto start = chrono::system_clock::now();
+    auto pid_start = chrono::system_clock::now();
     while (true) {
         //Insert feed into frame mat
         stream1 >> cameraFrame;
         //Check if feed has stopped
         if (cameraFrame.empty()) {
-            std::cerr << "the frame is empty" << std::endl;
+            cerr << "the frame is empty" << endl;
             break;
         }
 
@@ -437,7 +438,7 @@ int CV_motor_control(VideoCapture &stream1){
             cout << "Count up: " << id[1] << '\n';
         }
         frames++;
-        motor_kontrol_enhed(id, cameraFrame, rows, cols, speed, point1, status, start, frames);
+        motor_kontrol_enhed(id, cameraFrame, rows, cols, speed, point1, status, start, frames, pid_start);
 
         //UI, bottom half
         rectangle( cameraFrame,Point(0,rows*0.875),Point(cols-1,rows-1),Scalar( 0, 255, 0 ),1);
