@@ -360,7 +360,7 @@ void motor_kontrol_enhed(vector<int>&ids, Mat&cameraFrame, int rows, int cols, i
                  LeftMotor(BACK, 0, cameraFrame, rows, cols);
                  cout << "Case 0 - Stopskilt" << '\n';
                  fps_counter(start, frames);
-                 exit(0);
+                 quit = false;
 
               //Stop
               case 1:
@@ -574,7 +574,9 @@ int CV_motor_control(VideoCapture&stream1)
          break;
       }
    }
-
+   nn.join();
+   vej.join();
+   motor.join();
    return(0);
 }
 
@@ -585,6 +587,7 @@ int main()
    cout << "done\n";
    CV_motor_control(stream1);
    //Clean up
+
    stream1.release();
    destroyAllWindows();
 }
