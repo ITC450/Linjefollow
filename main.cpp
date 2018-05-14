@@ -273,6 +273,7 @@ void vej_foelger(Mat&cameraFrame, int rows, int cols, int slice, int&afvigelse)
    Mat cvt;
    Mat blur;
    Mat thres;
+   Mat Bund;
 
    vector <vector <Point> > contours;
    vector <Vec4i>           hierarchy;
@@ -286,7 +287,7 @@ void vej_foelger(Mat&cameraFrame, int rows, int cols, int slice, int&afvigelse)
      {
         unique_lock<mutex>lk(m);
         cv1.wait(lk, []{return ready == false;});
-        Mat Bund = pre_proc(cameraFrame, rows, cols, slice);
+        Bund = pre_proc(cameraFrame, rows, cols, slice);
       }
      //Masks and find contours
      cvtColor(Bund, cvt, CV_BGR2GRAY);
@@ -443,6 +444,7 @@ void NN(Mat&cameraFrame, vector <int> &id, int&status)
    id.push_back(-1);
    id.push_back(0);
    vector <vector <Point> > squares;
+   Mat sign;
    cout << "Setting up NN........";
    matrix *m1;
    initmat(&m1, 256, 1, 0.0); //Vektor til input billed
@@ -512,7 +514,7 @@ int CV_motor_control(VideoCapture&stream1)
    vector <int> id;
    int status { -1 };
 
-   Mat cameraFrame;
+   Mat cameraFrame, cameraFrameOrg;
    cout << "Setting up motors....";
    MotorInit();
    cout << "done\n";
@@ -522,7 +524,7 @@ int CV_motor_control(VideoCapture&stream1)
       return(-1);
    }
 
-   Mat sign;
+
    stream1 >> cameraFrame;
    //Gets the resolution of the feed
    cout << "Resolution: " << '\n';
@@ -531,7 +533,7 @@ int CV_motor_control(VideoCapture&stream1)
    VideoWriter video("linefollower.avi", CV_FOURCC('M', 'J', 'P', 'G'), 30, Size(cols, rows));
    thread nn(NN, ref(cameraFrame),ref(id),ref(status));
    thread vej(vej_foelger, ref(cameraFrame), rows, cols, 8, ref(point1));
-   thread motor(motor_kontrol_enhed, ref(ids), ref(cameraFrame), rows, cols, point, ref(status), ref(frames));
+   thread motor(motor_kontrol_enhed, ref(id), ref(cameraFrame), rows, cols, point1, ref(status), ref(frames));
    //Video from camera
 
    //.set is for controlling size of stream and the stream mat
