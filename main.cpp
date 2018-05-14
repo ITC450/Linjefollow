@@ -14,6 +14,7 @@
 #include "opencv2/highgui/highgui.hpp"
 #include <math.h>
 #include <chrono>
+#include <condition_variable>
 
 #include "matx.h"
 #include "neu.h"
