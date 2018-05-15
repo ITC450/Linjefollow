@@ -44,8 +44,8 @@ void RightMotor(direction dir, int speed, Mat mat, int rows, int cols) {
 }
 
 double radius(double error){
-  double v = atan(error/Q);
-  double r = -(sqrt(pow(Q,2)+pow(error,2)))/(2*sin((-PI/2)+2*abs(v)));
+  //double v = atan(error/Q);
+  double r = abs(Q/(sin(2*atan(abs(error)/Q))));
   return r;
 }
 
