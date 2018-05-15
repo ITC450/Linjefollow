@@ -234,6 +234,7 @@ Mat scan(Mat image, vector<vector<Point> > &squares) {
     {
         unique_lock<mutex> lk(m);
         cv1.wait(lk, [] { return ready;});
+        ready = false;
         cout << "NN\n";
         features = image.clone();
     }
@@ -275,6 +276,7 @@ void vej_foelger(int rows, int cols, int slice) {
             unique_lock<mutex> lk(m);
             cout << "Vej_følger\n";
             cv1.wait(lk, [] { return ready;});
+            ready = false;
             Bund = pre_proc(cameraFrame, rows, cols, slice);
         }
         //Masks and find contours
@@ -335,6 +337,7 @@ void motor_kontrol_enhed(int rows, int cols, int point) {
             {
                 unique_lock<mutex> lky(y);
                 cv2.wait(lky, [] { return ready2;});
+                ready2 = false;
                 status2=status;
                 id2=id;
             }
@@ -549,7 +552,7 @@ int CV_motor_control(VideoCapture &stream1) {
         }
     }
     nn.join();
-    vej.join();
+   // vej.join();
     motor.join();
     return (0);
 }
