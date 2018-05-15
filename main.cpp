@@ -322,14 +322,20 @@ void motor_kontrol_enhed(int rows, int cols, int point) {
     auto start = chrono::system_clock::now();
     auto pid_start = chrono::system_clock::now();
     int speed = 100;
+    int status2;
+    vector<int> id2;
 
     while (quit) {
         {
-            unique_lock<mutex> lky(y);
-            cv2.wait(lky, [] { return ready2 == false; });
+            {
+                unique_lock<mutex> lky(y);
+                cv2.wait(lky, [] { return ready2 == false; });
+                status2=status;
+                id2=id;
+            }
             cout << "Motor_Kontrol\n";
-            if (id[0] >= 0) {
-                if (id[0] == status && id[1] == 2) {
+            if (id2[0] >= 0) {
+                if (id2[0] == status2 && id2[1] == 2) {
                     switch (id[0]) {
                         //Kill
                         case 0:
@@ -384,12 +390,18 @@ void motor_kontrol_enhed(int rows, int cols, int point) {
                             break;
                     }
                 }
-                status = id[0];
+                {
+                    unique_lock<mutex> lky(y);
+                    status = id[0];
+                }
             } else {
-                status = -1;
+                {
+                    unique_lock<mutex> lky(y);
+                    status = -1;
+                }
             }
 
-            if (status != 1) {
+            if (status2 != 1) {
                 MotorFollowLine(point, cameraFrame, rows, cols, speed, pid_start);
             }
         }
