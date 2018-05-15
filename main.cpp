@@ -230,8 +230,13 @@ Mat pers_corr(Mat image, const vector<vector<Point> > &squares) {
 }
 
 Mat scan(Mat image, vector<vector<Point> > &squares) {
-    Mat features = image.clone();
-
+    Mat features;
+    {
+        unique_lock<mutex> lk(m);
+        cv1.wait(lk, [] { return ready;});
+        cout << "NN\n";
+        features = image.clone();
+    }
     findSquares(features, squares);
     //cout << "Number of squares: " << squares.size() << "\n";
     features = pers_corr(features, squares);
@@ -269,7 +274,7 @@ void vej_foelger(int rows, int cols, int slice) {
         {
             unique_lock<mutex> lk(m);
             cout << "Vej_følger\n";
-            cv1.wait(lk, [] { return ready == false; });
+            cv1.wait(lk, [] { return ready;});
             Bund = pre_proc(cameraFrame, rows, cols, slice);
         }
         //Masks and find contours
@@ -329,7 +334,7 @@ void motor_kontrol_enhed(int rows, int cols, int point) {
         {
             {
                 unique_lock<mutex> lky(y);
-                cv2.wait(lky, [] { return ready2 == false; });
+                cv2.wait(lky, [] { return ready2;});
                 status2=status;
                 id2=id;
             }
@@ -441,13 +446,11 @@ void NN() {
     cout << "done\n";
 
     while (quit) {
-        {
-            unique_lock<mutex> lk(m);
-            cv1.wait(lk, [] { return ready == false; });
-            cout << "NN\n";
+
+
             sign = scan(cameraFrame, squares);
             //ready = true;
-        }
+
         {
             unique_lock<mutex> lky(y);
             id[0] = -1;
