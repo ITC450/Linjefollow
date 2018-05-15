@@ -166,12 +166,12 @@ void motor_kontrol_enhed(vector<int> ids, Mat cameraFrame, int rows, int cols, d
                     break;
                     //Slow
                 case 2:
-                    speed = 0.05;
+                    speed = 0.4;
                     std::cout << "Case 2 - Speed = 50" << '\n';
                     break;
                     //Fast
                 case 3:
-                    speed = 0.1;
+                    speed = 0.6;
                     std::cout << "Case 3 - Speed = 100" << '\n';
                     break;
                     //Left
