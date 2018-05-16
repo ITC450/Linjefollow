@@ -355,6 +355,7 @@ void motor_kontrol_enhed(int rows, int cols) {
                     switch (id[0]) {
                         //Kill
                         case 0:
+			    speed = 0;
                             RightMotor(BACK, 0, cameraFrame, rows, cols);
                             LeftMotor(BACK, 0, cameraFrame, rows, cols);
                             cout << "Case 0 - Stopskilt" << '\n';
