@@ -238,6 +238,7 @@ Mat scan(Mat image, vector<vector<Point> > &squares) {
         cout << "NN\n";
         features = image.clone();
     }
+
     findSquares(features, squares);
     //cout << "Number of squares: " << squares.size() << "\n";
     features = pers_corr(features, squares);
@@ -328,7 +329,7 @@ void fps_counter(chrono::time_point<chrono::high_resolution_clock> start, int &f
 }
 
 //General motor control unit
-void motor_kontrol_enhed(int rows, int cols, int point) {
+void motor_kontrol_enhed(int rows, int cols) {
     auto start = chrono::system_clock::now();
     auto pid_start = chrono::system_clock::now();
     int speed = 100;
@@ -413,10 +414,12 @@ void motor_kontrol_enhed(int rows, int cols, int point) {
             }
 
             if (status2 != 1) {
-                MotorFollowLine(point, cameraFrame, rows, cols, speed, pid_start);
+                MotorFollowLine(point1, cameraFrame, rows, cols, speed, pid_start);
             }
         }
     }
+    ready = true;
+    cv1.notify_all();
 }
 
 void data_conv(Mat picture, matrix *m1) {
@@ -456,10 +459,12 @@ void NN() {
 
             sign = scan(cameraFrame, squares);
             //ready = true;
+                    cout << "sign size: "<< sign.rows << "\n";
 
         {
             unique_lock<mutex> lky(y);
             id[0] = -1;
+            cout << "Squares " << squares.size() << "\n";
             if (squares.size() != 0) {
                 data_conv(sign, m1);                           //Konvertering fra Mat til matrix
                 matnormpext(m1, &normmat, uext, 1);            //Normering af data
@@ -512,7 +517,7 @@ int CV_motor_control(VideoCapture &stream1) {
     //VideoWriter video("linefollower.avi", CV_FOURCC('M', 'J', 'P', 'G'), 30, Size(cols, rows));
     thread nn(NN);
     thread vej(vej_foelger, rows, cols, 8);
-    thread motor(motor_kontrol_enhed, rows, cols, point1);
+    thread motor(motor_kontrol_enhed, rows, cols);
     //Video from camera
 
     //.set is for controlling size of stream and the stream mat
@@ -533,20 +538,23 @@ int CV_motor_control(VideoCapture &stream1) {
 
         {
             unique_lock<mutex> lk(m);
-            Mat cameraFrame = cameraFrameOrg.clone();
+            cameraFrame = cameraFrameOrg.clone();
             frames++;
             cout << "Kam\n";
+            ready = true;
+        }
+        cv1.notify_all();
             //UI, bottom half
-            rectangle(cameraFrame, Point(0, rows * 0.875), Point(cols - 1, rows - 1), Scalar(0, 255, 0), 1);
+            rectangle(cameraFrameOrg, Point(0, rows * 0.875), Point(cols - 1, rows - 1), Scalar(0, 255, 0), 1);
 #ifdef __x86_64
             //Show the image/frame
             namedWindow("Frame", CV_WINDOW_AUTOSIZE);
             imshow("Frame", cameraFrame);
 #endif
             //video.write(cameraFrame);
-        ready = true;
-        }
-        cv1.notify_all();
+
+
+
 
         //Esc to close
         char c = (char) waitKey(1);
@@ -555,8 +563,12 @@ int CV_motor_control(VideoCapture &stream1) {
             break;
         }
     }
+    ready =true;
+    ready2 = true;
+    cv1.notify_all();
+    cv2.notify_all();
     nn.join();
-   // vej.join();
+    vej.join();
     motor.join();
     return (0);
 }
