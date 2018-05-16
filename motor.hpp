@@ -15,10 +15,10 @@ enum direction {BACK , FORWARD};
 
 void MotorInit();
 
-void LeftMotor(direction dir, int speed, Mat mat, int rows, int cols);
+void LeftMotor(direction dir, int speed);
 
-void RightMotor(direction dir, int speed, Mat mat, int rows, int cols);
+void RightMotor(direction dir, int speed);
 
 double pid(int err, std::chrono::time_point<std::chrono::high_resolution_clock> &pid_start);
 
-void MotorFollowLine(int err, Mat mat, int rows, int cols, int speed, std::chrono::time_point<std::chrono::high_resolution_clock> &start);
+void MotorFollowLine(int err, int speed, std::chrono::time_point<std::chrono::high_resolution_clock> &start);

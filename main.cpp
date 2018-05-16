@@ -356,8 +356,8 @@ void motor_kontrol_enhed(int rows, int cols) {
                         //Kill
                         case 0:
 			                speed = 0;
-                            RightMotor(BACK, 0, cameraFrame, rows, cols);
-                            LeftMotor(BACK, 0, cameraFrame, rows, cols);
+                            RightMotor(BACK, 0);
+                            LeftMotor(BACK, 0);
                             cout << "Case 0 - Stopskilt" << '\n';
                             fps_counter(start, frames);
                             quit = false;
@@ -365,8 +365,8 @@ void motor_kontrol_enhed(int rows, int cols) {
 
                             //Stop
                         case 1:
-                            RightMotor(FORWARD, 0, cameraFrame, rows, cols);
-                            LeftMotor(FORWARD, 0, cameraFrame, rows, cols);
+                            RightMotor(FORWARD, 0);
+                            LeftMotor(FORWARD, 0);
                             cout << "Case 1 - Parkeringsskilt" << '\n';
                             break;
 
@@ -403,8 +403,8 @@ void motor_kontrol_enhed(int rows, int cols) {
 
                             //Right
                         default:
-                            RightMotor(FORWARD, 0, cameraFrame, rows, cols);
-                            LeftMotor(FORWARD, 0, cameraFrame, rows, cols);
+                            RightMotor(FORWARD, 0);
+                            LeftMotor(FORWARD, 0);
                             break;
                     }
                 }
@@ -420,7 +420,7 @@ void motor_kontrol_enhed(int rows, int cols) {
             }
 
             if (status2 != 1) {
-                MotorFollowLine(point1, cameraFrame, rows, cols, speed, pid_start);
+                MotorFollowLine(point1, speed, pid_start);
             }
         }
     }
@@ -552,7 +552,7 @@ int CV_motor_control(VideoCapture &stream1) {
         }
         cv1.notify_all();
             //UI, bottom half
-            rectangle(cameraFrameOrg, Point(0, rows * 0.875), Point(cols - 1, rows - 1), Scalar(0, 255, 0), 1);
+      //      rectangle(cameraFrameOrg, Point(0, rows * 0.875), Point(cols - 1, rows - 1), Scalar(0, 255, 0), 1);
 #ifdef __x86_64
             //Show the image/frame
             namedWindow("Frame", CV_WINDOW_AUTOSIZE);
@@ -577,8 +577,8 @@ int CV_motor_control(VideoCapture &stream1) {
     nn.join();
     vej.join();
     motor.join();
-    RightMotor(BACK, 0, cameraFrame, rows, cols);
-    LeftMotor(BACK, 0, cameraFrame, rows, cols);
+    RightMotor(BACK, 0);
+    LeftMotor(BACK, 0);
     return (0);
 }
 

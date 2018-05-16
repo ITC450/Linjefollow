@@ -16,36 +16,36 @@ void MotorInit()
    pinMode(25, OUTPUT);
 }
 
-void LeftMotor(direction dir, int speed, Mat mat, int rows, int cols)
+void LeftMotor(direction dir, int speed)
 {
    if (dir == BACK)
    {
       digitalWrite(2, HIGH);
       digitalWrite(3, LOW);
-      arrowedLine(mat, Point2f(cols / 8, rows / 2), Point2f(cols / 8, (rows / 2) + speed), Scalar(0, 255 - speed, speed), 1, 8, 0);
+
    }
    else
    {
       digitalWrite(2, LOW);
       digitalWrite(3, HIGH);
-      arrowedLine(mat, Point2f(cols / 8, rows / 2), Point2f(cols / 8, (rows / 2) - speed), Scalar(0, 255 - speed, speed), 1, 8, 0);
+
    }
    pwmWrite(1, speed);
 }
 
-void RightMotor(direction dir, int speed, Mat mat, int rows, int cols)
+void RightMotor(direction dir, int speed)
 {
    if (dir == BACK)
    {
       digitalWrite(25, HIGH);
       digitalWrite(24, LOW);
-      arrowedLine(mat, Point2f((cols / 8) * 7, rows / 2), Point2f((cols / 8) * 7, (rows / 2) + speed), Scalar(0, 255 - speed, speed), 1, 8, 0);
+
    }
    else
    {
       digitalWrite(25, LOW);
       digitalWrite(24, HIGH);
-      arrowedLine(mat, Point2f((cols / 8) * 7, rows / 2), Point2f((cols / 8) * 7, (rows / 2) - speed), Scalar(0, 255 - speed, speed), 1, 8, 0);
+
    }
    pwmWrite(23, speed);
 }
@@ -74,26 +74,26 @@ double pid(int err, std::chrono::time_point <std::chrono::high_resolution_clock>
 }
 
 //Follow line function
-void MotorFollowLine(int err, Mat mat, int rows, int cols, int speed, std::chrono::time_point <std::chrono::high_resolution_clock>&pid_start)
+void MotorFollowLine(int err, int speed, std::chrono::time_point <std::chrono::high_resolution_clock>&pid_start)
 {
    double error = pid(err, pid_start);
 
    if (err < 0)
    {
-      LeftMotor(FORWARD, speed - int(abs(error)), mat, rows, cols);
-      RightMotor(FORWARD, speed + int(abs(error)), mat, rows, cols);
+      LeftMotor(FORWARD, speed - int(abs(error)));
+      RightMotor(FORWARD, speed + int(abs(error)));
       return;
    }
    if (err > 0)
    {
-      RightMotor(FORWARD, speed - int(abs(error)), mat, rows, cols);
-      LeftMotor(FORWARD, speed + int(abs(error)), mat, rows, cols);
+      RightMotor(FORWARD, speed - int(abs(error)));
+      LeftMotor(FORWARD, speed + int(abs(error)));
       return;
    }
    if (err == 0)
    {
-      RightMotor(FORWARD, speed, mat, rows, cols);
-      LeftMotor(FORWARD, speed, mat, rows, cols);
+      RightMotor(FORWARD, speed);
+      LeftMotor(FORWARD, speed);
       return;
    }
 }
