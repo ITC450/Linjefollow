@@ -340,7 +340,7 @@ void motor_kontrol_enhed(int rows, int cols) {
     vector<int> id2;
 
     while (quit) {
-        {
+
             {
                 unique_lock<mutex> lky(y);
                 while(!ready2)cv2.wait(lky);
@@ -420,9 +420,12 @@ void motor_kontrol_enhed(int rows, int cols) {
             }
 
             if (status2 != 1) {
-                MotorFollowLine(point1, speed, pid_start);
+                {
+                    unique_lock<mutex> lky(y);
+                    MotorFollowLine(point1, speed, pid_start);
+                }
             }
-        }
+
     }
     ready = true;
     cv1.notify_all();
