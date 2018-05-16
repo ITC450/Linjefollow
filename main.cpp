@@ -279,6 +279,7 @@ void vej_foelger(int rows, int cols, int slice) {
             ready = false;
             Bund = pre_proc(cameraFrame, rows, cols, slice);
         }
+
         //Masks and find contours
         cvtColor(Bund, cvt, CV_BGR2GRAY);
         GaussianBlur(cvt, blur, Size(5, 5), 0, 0);
@@ -303,8 +304,10 @@ void vej_foelger(int rows, int cols, int slice) {
 
             Point2f mc;
             mc = Point2f(mu.m10 / mu.m00, mu.m01 / mu.m00);
+            cout << "vej lky\n";
             {
                 unique_lock<mutex> lky(y);
+
                 point1 = mc.x - (cols / 2);
                 ready2 = true;
             }
@@ -476,12 +479,13 @@ void NN() {
                 if (id[1] > 2) {
                     id[1] = 3;
                 }
-                ready2 = true;
+
             }
-            cv2.notify_all();
+            ready2 = true;
             cout << "Status: " << id[0] << "\n";
             cout << "Count up: " << id[1] << '\n';
         }
+        cv2.notify_all();
     }
 }
 
