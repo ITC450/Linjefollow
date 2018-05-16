@@ -34,6 +34,7 @@ using namespace cv;
 bool quit = true;
 bool ready = false;
 bool ready2 = false;
+bool thread_done = false;
 mutex m;
 mutex y;
 condition_variable cv1;
@@ -310,7 +311,9 @@ void vej_foelger(int rows, int cols, int slice) {
                 unique_lock<mutex> lky(y);
 
                 point1 = mc.x - (cols / 2);
-                ready2 = true;
+                if(thread_done)ready2 = true;
+                thread_done=true;
+
             }
             cv2.notify_all();
             //Draw the center and contour outline
@@ -341,6 +344,7 @@ void motor_kontrol_enhed(int rows, int cols) {
             {
                 unique_lock<mutex> lky(y);
                 cv2.wait(lky, [] { return ready2;});
+                thread_done = false;
                 ready2 = false;
                 status2=status;
                 id2=id;
@@ -486,7 +490,8 @@ void NN() {
                 }
 
             }
-            ready2 = true;
+            if (thread_done)ready2 = true;
+            thread_done = true;
             cout << "Status: " << id[0] << "\n";
             cout << "Count up: " << id[1] << '\n';
         }
