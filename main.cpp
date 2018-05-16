@@ -35,6 +35,8 @@ bool quit = true;
 bool ready = false;
 bool ready2 = false;
 bool thread_done = false;
+int thread_state = 3;
+int thread_state2 = 3;
 mutex m;
 mutex y;
 condition_variable cv1;
@@ -83,39 +85,6 @@ Mat reSize(Mat input) {
     return (output);
 }
 
-//Distance estimater
-int distEsti(vector<vector<cv::Point2f> > corners) {
-    int dist, focal = 500;
-    float arucosize = 67.78;
-    //float focal=(afstand til camera*pixel count)/diagonal længde;
-    //float focal=(35*)/67.78;
-    Point2f pt1, pt2;
-
-    pt1 = corners[0][0];
-    pt2 = corners[0][2];
-    //std::cout << corners[0] << "\n";
-    //std::cout << pt1.x << ", " << pt1.y << "\n";
-    //std::cout << pt2.x << ", " << pt2.y << "\n";
-    double pix = norm(pt1 - pt2);
-    dist = (arucosize * focal) / pix;
-    //std::cout << dist << "mm" << "\n";
-    return (dist);
-}
-
-//Focal length calculater
-int focal(vector<vector<cv::Point2f> > corners) {
-    int dist, focal, fysDist = 200;
-    float arucosize = 67.78;
-    Point2f pt1, pt2;
-
-    pt1 = corners[0][0];
-    pt2 = corners[0][2];
-    double pix = norm(pt1 - pt2);
-    focal = (fysDist * pix) / arucosize;
-    //std::cout << focal << "\n";
-    return (focal);
-}
-
 static double angle(Point pt1, Point pt2, Point pt0) {
     double dx1 = pt1.x - pt0.x;
     double dy1 = pt1.y - pt0.y;
@@ -130,6 +99,18 @@ struct sortArea {
         return (contourArea(pt1, false) > contourArea(pt2, false));
     }
 } mySortArea;
+
+struct sortY {
+    bool operator()(cv::Point2f pt1, cv::Point2f pt2) {
+        return (pt1.y < pt2.y);
+    }
+} mySortY;
+
+struct sortX {
+    bool operator()(cv::Point2f pt1, cv::Point2f pt2) {
+        return (pt1.x < pt2.x);
+    }
+} mySortX;
 
 static void findSquares(const Mat &image, vector<vector<Point> > &squares) {
     //https://github.com/alyssaq/opencv/blob/master/squares.cpp
@@ -183,18 +164,6 @@ static void findSquares(const Mat &image, vector<vector<Point> > &squares) {
     }
 }
 
-struct sortY {
-    bool operator()(cv::Point2f pt1, cv::Point2f pt2) {
-        return (pt1.y < pt2.y);
-    }
-} mySortY;
-
-struct sortX {
-    bool operator()(cv::Point2f pt1, cv::Point2f pt2) {
-        return (pt1.x < pt2.x);
-    }
-} mySortX;
-
 Mat pers_corr(Mat image, const vector<vector<Point> > &squares) {
     Mat fixed;
     Mat h;
@@ -234,11 +203,12 @@ Mat scan(Mat image, vector<vector<Point> > &squares) {
     Mat features;
     {
         unique_lock<mutex> lk(m);
-        cv1.wait(lk, [] { return ready;});
-        ready = false;
-        cout << "NN\n";
+        cv1.wait(lk, [] { return thread_state==3 || thread_state==2;});
+        thread_state--;
+        cout << "NN m: " << thread_state << "\n";
         features = image.clone();
     }
+    cv1.notify_all();
 
     findSquares(features, squares);
     //cout << "Number of squares: " << squares.size() << "\n";
@@ -276,11 +246,12 @@ void vej_foelger(int rows, int cols, int slice) {
         //Top slice
         {
             unique_lock<mutex> lk(m);
-            cout << "Vej_følger\n";
-            cv1.wait(lk, [] { return ready;});
-            ready = false;
+            cv1.wait(lk, [] { return thread_state==3 || thread_state==2;});
+            thread_state--;
+            cout << "Vej_følger m: " << thread_state << "\n";
             Bund = pre_proc(cameraFrame, rows, cols, slice);
         }
+        cv1.notify_all();
 
         //Masks and find contours
         cvtColor(Bund, cvt, CV_BGR2GRAY);
@@ -306,14 +277,12 @@ void vej_foelger(int rows, int cols, int slice) {
 
             Point2f mc;
             mc = Point2f(mu.m10 / mu.m00, mu.m01 / mu.m00);
-            cout << "vej lky\n";
             {
                 unique_lock<mutex> lky(y);
 
                 point1 = mc.x - (cols / 2);
-                if(thread_done)ready2 = true;
-                thread_done=true;
-
+                thread_state2--;
+                cout << "Vej_følger y: " << thread_state2 << "\n";
             }
             cv2.notify_all();
             //Draw the center and contour outline
@@ -343,13 +312,13 @@ void motor_kontrol_enhed(int rows, int cols) {
 
             {
                 unique_lock<mutex> lky(y);
-                while(!ready2)cv2.wait(lky);
-                thread_done = false;
-                ready2 = false;
+                cv2.wait(lky, [] { return thread_state2 == 1;});
+                thread_state2--;
+                cout << "Motor_Kontrol m: " << thread_state << "\n";
+                cout << "Motor_Kontrol y: " << thread_state2 << "\n";
                 status2=status;
                 id2=id;
             }
-            cout << "Motor_Kontrol\n";
             if (id2[0] >= 0) {
                 if (id2[0] == status2 && id2[1] == 2) {
                     switch (id[0]) {
@@ -467,13 +436,10 @@ void NN() {
 
 
             sign = scan(cameraFrame, squares);
-            //ready = true;
-                    cout << "sign size: "<< sign.rows << "\n";
-
         {
             unique_lock<mutex> lky(y);
             id[0] = -1;
-            cout << "Squares " << squares.size() << "\n";
+            //cout << "Squares " << squares.size() << "\n";
             if (squares.size() != 0) {
                 data_conv(sign, m1);                           //Konvertering fra Mat til matrix
                 matnormpext(m1, &normmat, uext, 1);            //Normering af data
@@ -495,10 +461,10 @@ void NN() {
                 }
 
             }
-            if (thread_done)ready2 = true;
-            thread_done = true;
-            cout << "Status: " << id[0] << "\n";
-            cout << "Count up: " << id[1] << '\n';
+            //cout << "Status: " << id[0] << "\n";
+            //cout << "Count up: " << id[1] << '\n';
+            thread_state2--;
+            cout << "NN y:" << thread_state2 << "\n";
         }
         cv2.notify_all();
     }
@@ -549,8 +515,17 @@ int CV_motor_control(VideoCapture &stream1) {
         {
             unique_lock<mutex> lk(m);
             cameraFrame = cameraFrameOrg.clone();
+            if (thread_state == 1){
+                thread_state=3;
+                cout << "Kam m:     " << thread_state << "\n";
+
+            }
+            if (thread_state2 == 0){
+                thread_state2=3;
+                cout << "Kam y:     " << thread_state2 << "\n";
+
+            }
             frames++;
-            cout << "Kam\n";
             ready = true;
         }
         cv1.notify_all();
