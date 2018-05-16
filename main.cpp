@@ -343,7 +343,7 @@ void motor_kontrol_enhed(int rows, int cols) {
         {
             {
                 unique_lock<mutex> lky(y);
-                cv2.wait(lky, [] { return ready2;});
+                while(!ready2)cv2.wait(lky);
                 thread_done = false;
                 ready2 = false;
                 status2=status;
