@@ -355,12 +355,13 @@ void motor_kontrol_enhed(int rows, int cols) {
                     switch (id[0]) {
                         //Kill
                         case 0:
-			    speed = 0;
+			                speed = 0;
                             RightMotor(BACK, 0, cameraFrame, rows, cols);
                             LeftMotor(BACK, 0, cameraFrame, rows, cols);
                             cout << "Case 0 - Stopskilt" << '\n';
                             fps_counter(start, frames);
                             quit = false;
+                            break;
 
                             //Stop
                         case 1:
@@ -576,6 +577,8 @@ int CV_motor_control(VideoCapture &stream1) {
     nn.join();
     vej.join();
     motor.join();
+    RightMotor(BACK, 0, cameraFrame, rows, cols);
+    LeftMotor(BACK, 0, cameraFrame, rows, cols);
     return (0);
 }
 
