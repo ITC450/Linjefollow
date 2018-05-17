@@ -35,7 +35,8 @@ bool quit = true;
 bool ready = false;
 bool ready2 = false;
 bool thread_done = false;
-int thread_state = 3;
+int thread_vej = 2;
+int thread_NN = 2;
 int thread_state2 = 3;
 mutex m;
 mutex y;
@@ -203,9 +204,9 @@ Mat scan(Mat image, vector<vector<Point> > &squares) {
     Mat features;
     {
         unique_lock<mutex> lk(m);
-        cv1.wait(lk, [] { return thread_state==3 || thread_state==2;});
-        thread_state--;
-        cout << "NN m: " << thread_state << "\n";
+        cv1.wait(lk, [] { return thread_NN==2;});
+        thread_NN--;
+        cout << "NN m: " << thread_NN << "\n";
         features = image.clone();
     }
     cv1.notify_all();
@@ -246,9 +247,9 @@ void vej_foelger(int rows, int cols, int slice) {
         //Top slice
         {
             unique_lock<mutex> lk(m);
-            cv1.wait(lk, [] { return thread_state==3 || thread_state==2;});
-            thread_state--;
-            cout << "Vej_følger m: " << thread_state << "\n";
+            cv1.wait(lk, [] { return thread_vej==2;});
+            thread_vej--;
+            cout << "Vej_følger m: " << thread_vej << "\n";
             Bund = pre_proc(cameraFrame, rows, cols, slice);
         }
         cv1.notify_all();
@@ -285,7 +286,6 @@ void vej_foelger(int rows, int cols, int slice) {
                 cout << "Vej_følger y: " << thread_state2 << "\n";
             }
             cv2.notify_all();
-            usleep(5000);
         }
     }
     return;
@@ -312,7 +312,7 @@ void motor_kontrol_enhed(int rows, int cols) {
                 unique_lock<mutex> lky(y);
                 cv2.wait(lky, [] { return thread_state2 == 1;});
                 thread_state2--;
-                cout << "Motor_Kontrol m: " << thread_state << "\n";
+                cout << "Motor_Kontrol m: " << thread_vej << " : " << thread_NN << "\n";
                 cout << "Motor_Kontrol y: " << thread_state2 << "\n";
                 status2=status;
                 id2=id;
@@ -465,7 +465,6 @@ void NN() {
             cout << "NN y:" << thread_state2 << "\n";
         }
         cv2.notify_all();
-        usleep(5000);
     }
 }
 
@@ -514,9 +513,14 @@ int CV_motor_control(VideoCapture &stream1) {
         {
             unique_lock<mutex> lk(m);
             cameraFrame = cameraFrameOrg.clone();
-            if (thread_state == 1){
-                thread_state=3;
-                cout << "Kam m:     " << thread_state << "\n";
+            if (thread_vej == 1){
+                thread_vej=2;
+                cout << "Kam vej:     " << thread_vej << "\n";
+
+            }
+            if (thread_NN == 1){
+                thread_NN=2;
+                cout << "Kam NN:     " << thread_NN << "\n";
 
             }
             if (thread_state2 == 0){
@@ -544,7 +548,8 @@ int CV_motor_control(VideoCapture &stream1) {
         char c = (char) waitKey(1);
         if (c == 27) {
             quit = false;
-            thread_state=3;
+            thread_NN=2;
+            thread_vej=2;
             thread_state2=3;
             break;
         }
