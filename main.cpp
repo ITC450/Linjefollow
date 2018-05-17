@@ -35,8 +35,8 @@ bool quit = true;
 bool ready = false;
 bool ready2 = false;
 bool thread_done = false;
-int thread_vej = 2;
-int thread_NN = 2;
+int thread_vej = 1;
+int thread_NN = 1;
 int thread_state2 = 3;
 mutex m;
 mutex y;
@@ -503,7 +503,7 @@ int CV_motor_control(VideoCapture &stream1) {
     //Setup mat for source frame and insert feed into mat
 
     //Save as  settings
-    thread_state2 = 3;
+
     while (quit) {
         //Insert feed into frame mat
         stream1 >> cameraFrameOrg;
