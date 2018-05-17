@@ -5,8 +5,8 @@
 #include <iostream>
 #include <chrono>
 
-#define kp 0.5
-#define ki 0.01
+#define kp 0.3
+#define ki 0.035
 #define kd 0.01
 
 using namespace cv;
