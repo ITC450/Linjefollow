@@ -515,12 +515,9 @@ int CV_motor_control(VideoCapture &stream1) {
         {
             unique_lock<mutex> lk(m);
             cameraFrame = cameraFrameOrg.clone();
-            if (thread_vej == 1){
+            if (thread_vej == 1 && thread_NN==1){
                 thread_vej=2;
                 cout << "Kam vej:     " << thread_vej << "\n";
-
-            }
-            if (thread_NN == 1){
                 thread_NN=2;
                 cout << "Kam NN:     " << thread_NN << "\n";
 
