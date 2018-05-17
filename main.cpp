@@ -285,7 +285,7 @@ void vej_foelger(int rows, int cols, int slice) {
                 cout << "Vej_følger y: " << thread_state2 << "\n";
             }
             cv2.notify_all();
-            usleep(10000);
+            usleep(5000);
         }
     }
     return;
@@ -465,7 +465,7 @@ void NN() {
             cout << "NN y:" << thread_state2 << "\n";
         }
         cv2.notify_all();
-        usleep(10000);
+        usleep(5000);
     }
 }
 
