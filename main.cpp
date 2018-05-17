@@ -238,6 +238,7 @@ void vej_foelger(int rows, int cols, int slice) {
 
     vector<vector<Point> > contours;
     vector<Vec4i> hierarchy;
+    usleep(3000);
 
     while (quit) {
 
@@ -305,6 +306,7 @@ void motor_kontrol_enhed(int rows, int cols) {
     int speed = 100;
     int status2;
     vector<int> id2;
+    usleep(3000);
 
     while (quit) {
 
@@ -429,7 +431,7 @@ void NN() {
     initmat(&normmat, input, 1, 0.0);                          //Vektor til normering af billed
     initmat(&nn_out, output, 1, 0.0);                          //Vektor til output fra det neurale netværk
     cout << "done\n";
-
+    usleep(3000);
     while (quit) {
 
 
