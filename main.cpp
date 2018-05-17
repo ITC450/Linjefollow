@@ -526,7 +526,7 @@ int CV_motor_control(VideoCapture &stream1) {
                 cout << "Kam NN:     " << thread_NN << "\n";
 
             }
-            if (thread_state2 == 0){
+            if (thread_state2 <= 0){
                 thread_state2=3;
                 cout << "Kam y:     " << thread_state2 << "\n";
                 frames++;
