@@ -501,6 +501,7 @@ int CV_motor_control(VideoCapture &stream1) {
     //Setup mat for source frame and insert feed into mat
 
     //Save as  settings
+    thread_state2 = 3;
     while (quit) {
         //Insert feed into frame mat
         stream1 >> cameraFrameOrg;
