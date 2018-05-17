@@ -67,7 +67,7 @@ double pid(int err, std::chrono::time_point <std::chrono::high_resolution_clock>
    double derivative = (err - last_err) / dur.count();
    double Dout       = kd * derivative;
 
-   double output = Pout + Dout + Iout;
+   double output = Pout + Dout; // Iout;
 
    last_err = err;
    return(output);
