@@ -32,12 +32,11 @@ using namespace cv;
 //int speed;
 
 bool quit = true;
-bool ready = false;
-bool ready2 = false;
-bool thread_done = false;
+
 int thread_vej = 1;
 int thread_NN = 1;
-int thread_state2 = 3;
+int thread_vej2 = 0;
+int thread_NN2 = 0;
 mutex m;
 mutex y;
 condition_variable cv1;
@@ -283,8 +282,8 @@ void vej_foelger(int rows, int cols, int slice) {
                 unique_lock<mutex> lky(y);
 
                 point1 = mc.x - (cols / 2);
-                thread_state2--;
-                cout << "Vej_følger y: " << thread_state2 << "\n";
+                thread_vej2--;
+                cout << "Vej_følger y: " << thread_vej2 << "\n";
             }
             cv2.notify_all();
         }
@@ -312,10 +311,11 @@ void motor_kontrol_enhed(int rows, int cols) {
 
             {
                 unique_lock<mutex> lky(y);
-                cv2.wait(lky, [] { return thread_state2 == 1;});
-                thread_state2--;
+                cv2.wait(lky, [] { return thread_NN2 == 1 && thread_vej2==1;});
+                thread_NN2--;
+                thread_vej2--;
                 cout << "Motor_Kontrol m: " << thread_vej << " : " << thread_NN << "\n";
-                cout << "Motor_Kontrol y: " << thread_state2 << "\n";
+                cout << "Motor_Kontrol y: " << thread_vej2 << " : " << thread_NN2 << "\n";
                 status2=status;
                 id2=id;
             }
@@ -396,7 +396,6 @@ void motor_kontrol_enhed(int rows, int cols) {
             }
 
     }
-    ready = true;
     cv1.notify_all();
 }
 
@@ -463,8 +462,8 @@ void NN() {
             }
             //cout << "Status: " << id[0] << "\n";
             //cout << "Count up: " << id[1] << '\n';
-            thread_state2--;
-            cout << "NN y:" << thread_state2 << "\n";
+            thread_NN2--;
+            cout << "NN y:" << thread_NN2 << "\n";
         }
         cv2.notify_all();
     }
@@ -526,13 +525,13 @@ int CV_motor_control(VideoCapture &stream1) {
                 cout << "Kam NN:     " << thread_NN << "\n";
 
             }
-            if (thread_state2 <= 0){
-                thread_state2=3;
-                cout << "Kam y:     " << thread_state2 << "\n";
+            if (thread_NN2 == 0 && thread_vej2 == 0){
+                thread_NN2=2;
+                thread_vej2=2;
+                cout << "Kam y:     " << thread_vej2 << " : " << thread_vej2 << "\n";
                 frames++;
             }
 
-            ready = true;
         }
         cv1.notify_all();
             //UI, bottom half
@@ -559,9 +558,11 @@ int CV_motor_control(VideoCapture &stream1) {
     RightMotor(BACK, 0);
     LeftMotor(BACK, 0);
     quit = false;
+    cout << "#########################################################" << "\n";
     thread_NN=2;
     thread_vej=2;
-    thread_state2=3;
+    thread_NN2=2;
+    thread_vej2=2;
     cv1.notify_all();
     cv2.notify_all();
     nn.join();
