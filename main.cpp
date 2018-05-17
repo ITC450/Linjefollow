@@ -285,9 +285,7 @@ void vej_foelger(int rows, int cols, int slice) {
                 cout << "Vej_følger y: " << thread_state2 << "\n";
             }
             cv2.notify_all();
-            //Draw the center and contour outline
-            drawContours(Bund, contours, largest_contour_index, Scalar(255, 255, 255), 1, 4, hierarchy, 0, Point());
-            circle(Bund, mc, 4, Scalar(255, 255, 255), 1, 8, 0);
+            usleep(10000);
         }
     }
     return;
@@ -467,6 +465,7 @@ void NN() {
             cout << "NN y:" << thread_state2 << "\n";
         }
         cv2.notify_all();
+        usleep(10000);
     }
 }
 
@@ -545,6 +544,8 @@ int CV_motor_control(VideoCapture &stream1) {
         char c = (char) waitKey(1);
         if (c == 27) {
             quit = false;
+            thread_state=3;
+            thread_state2=3;
             break;
         }
     }
