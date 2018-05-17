@@ -526,9 +526,9 @@ int CV_motor_control(VideoCapture &stream1) {
             if (thread_state2 == 0){
                 thread_state2=3;
                 cout << "Kam y:     " << thread_state2 << "\n";
-
+                frames++;
             }
-            frames++;
+
             ready = true;
         }
         cv1.notify_all();
@@ -547,22 +547,24 @@ int CV_motor_control(VideoCapture &stream1) {
         //Esc to close
         char c = (char) waitKey(1);
         if (c == 27) {
-            quit = false;
-            thread_NN=2;
-            thread_vej=2;
-            thread_state2=3;
+
             break;
         }
     }
-    ready =true;
-    ready2 = true;
+    //ready =true;
+    //ready2 = true;
+    RightMotor(BACK, 0);
+    LeftMotor(BACK, 0);
+    quit = false;
+    thread_NN=2;
+    thread_vej=2;
+    thread_state2=3;
     cv1.notify_all();
     cv2.notify_all();
     nn.join();
     vej.join();
     motor.join();
-    RightMotor(BACK, 0);
-    LeftMotor(BACK, 0);
+
     return (0);
 }
 
