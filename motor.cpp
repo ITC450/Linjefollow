@@ -62,7 +62,7 @@ double pid(int err, std::chrono::time_point<std::chrono::high_resolution_clock> 
     double derivative = (err - last_err)/dur.count();
     double Dout = kd * derivative;
 
-    double output = Pout + Dout ;//+ Iout;
+    double output = Pout + Dout + Iout;
     //if (output > 450)output = 450; // sørger for output holder sig inden for range
     //else if (output < 50)output = 50; // myPID.Compute();
 
