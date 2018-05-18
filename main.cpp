@@ -318,6 +318,8 @@ void motor_kontrol_enhed(int rows, int cols) {
             //cout << "Motor_Kontrol y: " << thread_vej2 << " : " << thread_NN2 << "\n";
             status2=status;
             id2=id;
+            for( int y : id2)cout << "id: " << y << "\n";
+            cout << "status: " << status2;
             point_cp = point1;
 
         }
