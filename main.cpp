@@ -41,11 +41,7 @@ mutex m;
 mutex y;
 condition_variable cv1;
 condition_variable cv2;
-Mat cameraFrame;
-vector<int> id;
-int point1;
-int frames{0};
-int status{-1};
+
 
 //rows and cols return the height and width of the stream in pixels
 int mat_rows(Mat mat) {
@@ -227,7 +223,7 @@ Mat scan(Mat image, vector<vector<Point> > &squares) {
 }
 
 //Finds the center of mass of a Mat and draws it on a given Mat
-void vej_foelger(int rows, int cols, int slice) {
+void vej_foelger(int rows, int cols, int slice, Mat&cameraFrame, int&point1) {
     //int afvigelse;
     //Mats and containers
     Mat cvt;
@@ -299,7 +295,7 @@ void fps_counter(chrono::time_point<chrono::high_resolution_clock> start, int &f
 }
 
 //General motor control unit
-void motor_kontrol_enhed(int rows, int cols) {
+void motor_kontrol_enhed(int rows, int cols, vector<int>&id, int&status, int&frames, int&point1) {
     auto start = chrono::system_clock::now();
     auto pid_start = chrono::system_clock::now();
     int speed = 100;
@@ -318,8 +314,8 @@ void motor_kontrol_enhed(int rows, int cols) {
             //cout << "Motor_Kontrol y: " << thread_vej2 << " : " << thread_NN2 << "\n";
             status2=status;
             id2=id;
-            for( int y : id2)cout << "id: " << y << "\n";
-            cout << "status: " << status2;
+            //for( int y : id2)cout << "id: " << y << "\n";
+            //cout << "status: " << status2;
             point_cp = point1;
 
         }
@@ -421,7 +417,7 @@ void data_conv(Mat picture, matrix *m1) {
 }
 
 
-void NN() {
+void NN(vector<int>&id, Mat&cameraFrame, int&status) {
 
     vector<vector<Point> > squares;
     Mat sign;
@@ -480,7 +476,11 @@ void NN() {
 
 int CV_motor_control(VideoCapture &stream1) {
     //Init/setup
-
+    Mat cameraFrame;
+    vector<int> id;
+    int point1;
+    int frames{0};
+    int status{-1};
     id.push_back(-1);
     id.push_back(0);
     Mat cameraFrameOrg;
@@ -499,9 +499,9 @@ int CV_motor_control(VideoCapture &stream1) {
     int rows = mat_rows(cameraFrame);
     int cols = mat_cols(cameraFrame);
     //VideoWriter video("linefollower.avi", CV_FOURCC('M', 'J', 'P', 'G'), 30, Size(cols, rows));
-    thread nn(NN);
-    thread vej(vej_foelger, rows, cols, 8);
-    thread motor(motor_kontrol_enhed, rows, cols);
+    thread nn(NN, ref(id),ref(cameraFrame),ref(status));
+    thread vej(vej_foelger, rows, cols, 8, ref(cameraFrame), ref(point1));
+    thread motor(motor_kontrol_enhed, rows, cols, ref(id), ref(status), ref(frames), ref(point1));
     //Video from camera
 
     //.set is for controlling size of stream and the stream mat
