@@ -118,7 +118,7 @@ int vej_foelger(Mat cameraFrame,int rows,int cols, int slice){
     mc = Point2f( mu.m10/mu.m00, mu.m01/mu.m00 );
 
     afvigelse = mc.x-(cols/2);
-
+    afvigelse *= (640/cols);
     //Draw the center and contour outline
     drawContours( Bund, contours, largest_contour_index, Scalar(255,255,255), 1, 4, hierarchy, 0, Point() );
     circle( Bund, mc, 4, Scalar(255,255,255), 1, 8, 0 );
