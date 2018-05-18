@@ -205,7 +205,7 @@ Mat scan(Mat image, vector<vector<Point> > &squares) {
         unique_lock<mutex> lk(m);
         cv1.wait(lk, [] { return thread_NN==2;});
         thread_NN--;
-        cout << "NN m: " << thread_NN << "\n";
+       // cout << "NN m: " << thread_NN << "\n";
         features = image.clone();
     }
     cv1.notify_all();
@@ -249,7 +249,7 @@ void vej_foelger(int rows, int cols, int slice) {
             unique_lock<mutex> lk(m);
             cv1.wait(lk, [] { return thread_vej==2;});
             thread_vej--;
-            cout << "Vej_følger m: " << thread_vej << "\n";
+           // cout << "Vej_følger m: " << thread_vej << "\n";
             Bund = pre_proc(cameraFrame, rows, cols, slice);
         }
         cv1.notify_all();
@@ -283,7 +283,7 @@ void vej_foelger(int rows, int cols, int slice) {
 
                 point1 = mc.x - (cols / 2);
                 thread_vej2--;
-                cout << "Vej_følger y: " << thread_vej2 << "\n";
+               // cout << "Vej_følger y: " << thread_vej2 << "\n";
             }
             cv2.notify_all();
         }
@@ -314,8 +314,8 @@ void motor_kontrol_enhed(int rows, int cols) {
             unique_lock<mutex> lky(y);
             cv2.wait(lky, [] { return thread_NN2 == 1 && thread_vej2==1;});
 
-            cout << "Motor_Kontrol m: " << thread_vej << " : " << thread_NN << "\n";
-            cout << "Motor_Kontrol y: " << thread_vej2 << " : " << thread_NN2 << "\n";
+            //cout << "Motor_Kontrol m: " << thread_vej << " : " << thread_NN << "\n";
+            //cout << "Motor_Kontrol y: " << thread_vej2 << " : " << thread_NN2 << "\n";
             status2=status;
             id2=id;
             point_cp = point1;
@@ -470,7 +470,7 @@ void NN() {
             //cout << "Status: " << id[0] << "\n";
             //cout << "Count up: " << id[1] << '\n';
             thread_NN2--;
-            cout << "NN y:" << thread_NN2 << "\n";
+            //cout << "NN y:" << thread_NN2 << "\n";
         }
         cv2.notify_all();
     }
@@ -522,7 +522,7 @@ int CV_motor_control(VideoCapture &stream1) {
         {
             unique_lock<mutex> lk(m);
             cameraFrame = cameraFrameOrg.clone();
-            cout << ">>>>>>New frame<<<<<<" << "\n";
+            //cout << ">>>>>>New frame<<<<<<" << "\n";
             /*if (thread_vej2 <= 1 && thread_NN2<=1){
                 thread_vej=2;
                 cout << "Kam vej:     " << thread_vej << "\n";
@@ -535,7 +535,7 @@ int CV_motor_control(VideoCapture &stream1) {
                 thread_NN=2;
                 thread_NN2=2;
                 thread_vej2=2;
-                cout << "Kam y:     " << thread_vej2 << " : " << thread_vej2 << "\n";
+              //  cout << "Kam y:     " << thread_vej2 << " : " << thread_vej2 << "\n";
                 frames++;
             }
 
