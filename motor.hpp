@@ -6,7 +6,7 @@
 #include <chrono>
 
 #define kp 0.0065
-#define ki 0.0003
+#define ki 0.000
 #define kd 0.0006
 
 using namespace cv;
