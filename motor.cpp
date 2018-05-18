@@ -57,7 +57,7 @@ double pid(int err, std::chrono::time_point<std::chrono::high_resolution_clock> 
     double derivative = (err - last_err)/(dur.count()/1000);
     double Dout = kd * derivative;
 
-    double output = Pout + Iout; //+ Dout;
+    double output = Pout + Iout+ Dout;
 
     last_err=err;
     return output;
@@ -66,8 +66,8 @@ double pid(int err, std::chrono::time_point<std::chrono::high_resolution_clock> 
 //Follow line function
 void MotorFollowLine(int err, Mat mat, int rows, int cols, int speed, std::chrono::time_point<std::chrono::high_resolution_clock> &pid_start){
     double error = pid(err, pid_start);
-    std::cout << error << "\n";
     error=abs(error)+1;
+    std::cout << error << "\n";
     if(err < 0) {
         RightMotor(FORWARD, ((speed*2)/(error+1))*error, mat, rows, cols);
         LeftMotor(FORWARD, (speed*2)/(error+1), mat, rows, cols);
