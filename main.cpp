@@ -304,96 +304,103 @@ void motor_kontrol_enhed(int rows, int cols) {
     auto pid_start = chrono::system_clock::now();
     int speed = 100;
     int status2;
+    int point_cp;
     vector<int> id2;
     usleep(3000);
 
     while (quit) {
 
+        {
+            unique_lock<mutex> lky(y);
+            cv2.wait(lky, [] { return thread_NN2 == 1 && thread_vej2==1;});
+
+            cout << "Motor_Kontrol m: " << thread_vej << " : " << thread_NN << "\n";
+            cout << "Motor_Kontrol y: " << thread_vej2 << " : " << thread_NN2 << "\n";
+            status2=status;
+            id2=id;
+            point_cp = point1;
+
+        }
+        if (id2[0] >= 0) {
+            if (id2[0] == status2 && id2[1] == 2) {
+                switch (id[0]) {
+                    //Kill
+                    case 0:
+                        speed = 0;
+                        RightMotor(BACK, 0);
+                        LeftMotor(BACK, 0);
+                        cout << "Case 0 - Stopskilt" << '\n';
+                        fps_counter(start, frames);
+                        quit = false;
+                        break;
+
+                        //Stop
+                    case 1:
+                        RightMotor(FORWARD, 0);
+                        LeftMotor(FORWARD, 0);
+                        cout << "Case 1 - Parkeringsskilt" << '\n';
+                        break;
+
+                        //Slow
+                    case 2:
+                        speed = 100;
+                        cout << "Case 2 - Ligeud" << '\n';
+                        break;
+
+                    case 3:
+                        cout << "Case 3 - Højre" << '\n';
+                        break;
+
+                    case 4:
+                        cout << "Case 4 - Venstre" << '\n';
+                        break;
+
+                    case 5:
+                        speed = 100;
+                        cout << "Case 5 - 10" << '\n';
+                        break;
+
+                        //Fast
+                    case 6:
+                        speed = 175;
+                        cout << "Case 6 - 30" << '\n';
+                        break;
+
+                        //Left
+                    case 7:
+                        speed = 250;
+                        cout << "Case 7 - 50" << '\n';
+                        break;
+
+                        //Right
+                    default:
+                        RightMotor(FORWARD, 0);
+                        LeftMotor(FORWARD, 0);
+                        break;
+                }
+            }
             {
                 unique_lock<mutex> lky(y);
-                cv2.wait(lky, [] { return thread_NN2 == 1 && thread_vej2==1;});
+                status = id2[0];
+                status2 = status;
                 thread_NN2--;
                 thread_vej2--;
-                cout << "Motor_Kontrol m: " << thread_vej << " : " << thread_NN << "\n";
-                cout << "Motor_Kontrol y: " << thread_vej2 << " : " << thread_NN2 << "\n";
-                status2=status;
-                id2=id;
             }
-            if (id2[0] >= 0) {
-                if (id2[0] == status2 && id2[1] == 2) {
-                    switch (id[0]) {
-                        //Kill
-                        case 0:
-			                speed = 0;
-                            RightMotor(BACK, 0);
-                            LeftMotor(BACK, 0);
-                            cout << "Case 0 - Stopskilt" << '\n';
-                            fps_counter(start, frames);
-                            quit = false;
-                            break;
-
-                            //Stop
-                        case 1:
-                            RightMotor(FORWARD, 0);
-                            LeftMotor(FORWARD, 0);
-                            cout << "Case 1 - Parkeringsskilt" << '\n';
-                            break;
-
-                            //Slow
-                        case 2:
-                            speed = 100;
-                            cout << "Case 2 - Ligeud" << '\n';
-                            break;
-
-                        case 3:
-                            cout << "Case 3 - Højre" << '\n';
-                            break;
-
-                        case 4:
-                            cout << "Case 4 - Venstre" << '\n';
-                            break;
-
-                        case 5:
-                            speed = 100;
-                            cout << "Case 5 - 10" << '\n';
-                            break;
-
-                            //Fast
-                        case 6:
-                            speed = 175;
-                            cout << "Case 6 - 30" << '\n';
-                            break;
-
-                            //Left
-                        case 7:
-                            speed = 250;
-                            cout << "Case 7 - 50" << '\n';
-                            break;
-
-                            //Right
-                        default:
-                            RightMotor(FORWARD, 0);
-                            LeftMotor(FORWARD, 0);
-                            break;
-                    }
-                }
-                {
-                    unique_lock<mutex> lky(y);
-                    status = id[0];
-                }
-            } else {
-                {
-                    unique_lock<mutex> lky(y);
-                    status = -1;
-                }
+        } else {
+            {
+                unique_lock<mutex> lky(y);
+                status = -1;
+                status2 = status;
+                thread_NN2--;
+                thread_vej2--;
             }
+        }
 
-            if (status2 != 1) {
-                {
-                    unique_lock<mutex> lky(y);
-                    MotorFollowLine(point1, speed, pid_start);
-                }
-            }
+        if (status2 != 1) {
+
+            MotorFollowLine(point_cp, speed, pid_start);
+
+        }
 
     }
     cv1.notify_all();
@@ -434,7 +441,7 @@ void NN() {
     while (quit) {
 
 
-            sign = scan(cameraFrame, squares);
+        sign = scan(cameraFrame, squares);
         {
             unique_lock<mutex> lky(y);
             id[0] = -1;
@@ -534,14 +541,14 @@ int CV_motor_control(VideoCapture &stream1) {
 
         }
         cv1.notify_all();
-            //UI, bottom half
-      //      rectangle(cameraFrameOrg, Point(0, rows * 0.875), Point(cols - 1, rows - 1), Scalar(0, 255, 0), 1);
+        //UI, bottom half
+        //      rectangle(cameraFrameOrg, Point(0, rows * 0.875), Point(cols - 1, rows - 1), Scalar(0, 255, 0), 1);
 #ifdef __x86_64
-            //Show the image/frame
-            namedWindow("Frame", CV_WINDOW_AUTOSIZE);
-            imshow("Frame", cameraFrame);
+        //Show the image/frame
+        namedWindow("Frame", CV_WINDOW_AUTOSIZE);
+        imshow("Frame", cameraFrame);
 #endif
-            //video.write(cameraFrame);
+        //video.write(cameraFrame);
 
 
 
