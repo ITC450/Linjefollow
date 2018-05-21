@@ -321,7 +321,7 @@ void motor_kontrol_enhed(vector<int> ids, Mat cameraFrame, int rows, int cols, i
                     break;
                     //Left
                 case 7:
-                    speed = 250;
+                    speed = 220;
                     cout << "Case 7 - 50" << '\n';
                     break;
                     //Right
