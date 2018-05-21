@@ -8,18 +8,18 @@ void MotorInit() {
 
 void LeftMotor(direction dir, int speed, Mat mat, int rows, int cols) {
     if (dir == BACK) {
-        arrowedLine(mat, Point2f(cols/8,rows/2),     Point2f(cols/8,    (rows/2)+speed), Scalar(0,255-speed,speed), 2, 8, 0);
+        rectangle( mat,Point(0,rows*0.875),Point((cols/2)-1,(rows)-1),Scalar(0,255-speed,speed));
     }else{
-        arrowedLine(mat, Point2f(cols/8,rows/2),     Point2f(cols/8,    (rows/2)-speed), Scalar(0,255-speed,speed), 2, 8, 0);
+        rectangle( mat,Point(0,rows*0.875),Point((cols/2)-1,(rows)-1),Scalar(0,255-speed,speed));
     }
 }
 
 void RightMotor(direction dir, int speed, Mat mat, int rows, int cols) {
     if (dir == BACK) {
-        arrowedLine(mat, Point2f((cols/8)*7,rows/2), Point2f((cols/8)*7,(rows/2)+speed), Scalar(0,255-speed,speed), 2, 8, 0);
+        rectangle( mat,Point(cols/2,rows*0.875),Point((cols)-1,(rows)-1),Scalar(0,255-speed,speed));
     }
     else{
-        arrowedLine(mat, Point2f((cols/8)*7,rows/2), Point2f((cols/8)*7,(rows/2)-speed), Scalar(0,255-speed,speed), 2, 8, 0);
+        rectangle( mat,Point(cols/2,rows*0.875),Point((cols)-1,(rows)-1),Scalar(0,255-speed,speed));
     }
 }
 

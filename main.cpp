@@ -441,7 +441,7 @@ int CV_motor_control(VideoCapture &stream1){
         motor_kontrol_enhed(id, cameraFrame, rows, cols, speed, point1, status, start, frames, pid_start);
 
         //UI, bottom half
-        rectangle( cameraFrame,Point(0,rows*0.875),Point(cols-1,rows-1),Scalar( 0, 255, 0 ),1);
+        //rectangle( cameraFrame,Point(0,rows*0.875),Point(cols-1,rows-1),Scalar( 0, 255, 0 ),1);
 #ifdef __x86_64
         //Show the image/frame
         namedWindow( "Frame", CV_WINDOW_AUTOSIZE );

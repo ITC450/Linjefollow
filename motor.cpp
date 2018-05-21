@@ -20,11 +20,11 @@ void LeftMotor(direction dir, int speed, Mat mat, int rows, int cols) {
     {
         digitalWrite(2,HIGH);
         digitalWrite(3,LOW);
-        arrowedLine(mat, Point2f(cols/8,rows/2),     Point2f(cols/8,    (rows/2)+speed), Scalar(0,255-speed,speed), 1, 8, 0);
+        rectangle( mat,Point(0,rows*0.875),Point((cols/2)-1,(rows)-1),Scalar(0,255-speed,speed));
     }else{
         digitalWrite(2,LOW);
         digitalWrite(3,HIGH);
-        arrowedLine(mat, Point2f(cols/8,rows/2),     Point2f(cols/8,    (rows/2)-speed), Scalar(0,255-speed,speed), 1, 8, 0);
+        rectangle( mat,Point(0,rows*0.875),Point((cols/2)-1,(rows)-1),Scalar(0,255-speed,speed));
     }
     pwmWrite(1,speed);
 }
@@ -34,11 +34,11 @@ void RightMotor(direction dir, int speed, Mat mat, int rows, int cols) {
     {
         digitalWrite(25,HIGH);
         digitalWrite(24,LOW);
-        arrowedLine(mat, Point2f((cols/8)*7,rows/2), Point2f((cols/8)*7,(rows/2)+speed), Scalar(0,255-speed,speed), 1, 8, 0);
+        rectangle( mat,Point(cols/2,rows*0.875),Point((cols)-1,(rows)-1),Scalar(0,255-speed,speed));
     }else{
         digitalWrite(25,LOW);
         digitalWrite(24,HIGH);
-        arrowedLine(mat, Point2f((cols/8)*7,rows/2), Point2f((cols/8)*7,(rows/2)-speed), Scalar(0,255-speed,speed), 1, 8, 0);
+        rectangle( mat,Point(cols/2,rows*0.875),Point((cols)-1,(rows)-1),Scalar(0,255-speed,speed));
     }
     pwmWrite(23,speed);
 }
