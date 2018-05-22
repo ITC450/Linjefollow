@@ -500,21 +500,19 @@ int CV_motor_control(VideoCapture &stream1) {
         return (-1);
     }
 
-
+    //.set is for controlling size of stream and the stream mat
+    //stream1.set(CV_CAP_PROP_FRAME_WIDTH,2000);
+    //stream1.set(CV_CAP_PROP_FRAME_HEIGHT,1500);
+    VideoWriter video("linefollower.avi", CV_FOURCC('M', 'J', 'P', 'G'), 30, Size(cols, rows));
     stream1 >> cameraFrame;
     //Gets the resolution of the feed
     cout << "Resolution: " << '\n';
     int rows = mat_rows(cameraFrame);
     int cols = mat_cols(cameraFrame);
-    //VideoWriter video("linefollower.avi", CV_FOURCC('M', 'J', 'P', 'G'), 30, Size(cols, rows));
     thread nn(NN, ref(id),ref(cameraFrame),ref(status));
     thread vej(vej_foelger, rows, cols, 8, ref(cameraFrame), ref(point1));
     thread motor(motor_kontrol_enhed, rows, cols, ref(id), ref(status), ref(frames), ref(point1));
     //Video from camera
-
-    //.set is for controlling size of stream and the stream mat
-    //stream1.set(CV_CAP_PROP_FRAME_WIDTH,2000);
-    //stream1.set(CV_CAP_PROP_FRAME_HEIGHT,1500);
 
     //Setup mat for source frame and insert feed into mat
 
@@ -558,7 +556,7 @@ int CV_motor_control(VideoCapture &stream1) {
         namedWindow("Frame", CV_WINDOW_AUTOSIZE);
         imshow("Frame", cameraFrame);
 #endif
-        //video.write(cameraFrame);
+        video.write(cameraFrame);
 
 
 
