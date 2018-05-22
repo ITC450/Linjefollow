@@ -74,10 +74,9 @@ double pid(int err, std::chrono::time_point <std::chrono::high_resolution_clock>
 //Follow line function
 void MotorFollowLine(int err, int speed, std::chrono::time_point <std::chrono::high_resolution_clock>&pid_start)
 {
-
+   err/=2;
    double error = pid(err, pid_start);
    error=abs(error)+1;
-   error/=2;
    if (err < 0)
    {
      RightMotor(FORWARD, ((speed*2)/(error+1))*error);
