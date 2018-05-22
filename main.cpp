@@ -282,6 +282,13 @@ void vej_foelger(int rows, int cols, int slice, Mat&cameraFrame, int&point1) {
                cout << "Vej_følger y: " << thread_vej2 << "\n";
             }
             cv2.notify_all();
+        }else{
+            {
+                unique_lock<mutex> lky(y);
+                thread_vej2--;
+                cout << "Vej_følger y: " << thread_vej2 << "\n";
+            }
+            cv2.notify_all();
         }
     }
     return;
