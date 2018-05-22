@@ -278,6 +278,7 @@ void vej_foelger(int rows, int cols, int slice, Mat&cameraFrame, int&point1) {
                 unique_lock<mutex> lky(y);
 
                 point1 = mc.x - (cols / 2);
+                point1=point1*(640/cols);
                 thread_vej2--;
                cout << "Vej_følger y: " << thread_vej2 << "\n";
             }
