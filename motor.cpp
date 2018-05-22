@@ -65,6 +65,7 @@ double pid(int err, std::chrono::time_point<std::chrono::high_resolution_clock> 
 
 //Follow line function
 void MotorFollowLine(int err, Mat mat, int rows, int cols, int speed, std::chrono::time_point<std::chrono::high_resolution_clock> &pid_start){
+    err/=2;
     double error = pid(err, pid_start);
     error=abs(error)+1;
     std::cout << error << "\n";
