@@ -502,8 +502,9 @@ int CV_motor_control(VideoCapture &stream1) {
     }
 
     //.set is for controlling size of stream and the stream mat
-    stream1.set(CV_CAP_PROP_FRAME_WIDTH,1280);
-    stream1.set(CV_CAP_PROP_FRAME_HEIGHT,720);
+    //stream1.set(CV_CAP_PROP_FRAME_WIDTH,1280);
+    //stream1.set(CV_CAP_PROP_FRAME_HEIGHT,720);
+
     stream1 >> cameraFrame;
     //Gets the resolution of the feed
     cout << "Resolution: " << '\n';
