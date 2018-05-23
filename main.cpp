@@ -397,8 +397,8 @@ int CV_motor_control(VideoCapture &stream1){
     //Setup mat for source frame and insert feed into mat
     Mat cameraFrame;
     Mat sign;
-    stream1.set(CV_CAP_PROP_FRAME_HEIGHT,720);
-    stream1.set(CV_CAP_PROP_FRAME_WIDTH,1280);
+   // stream1.set(CV_CAP_PROP_FRAME_HEIGHT,720);
+   // stream1.set(CV_CAP_PROP_FRAME_WIDTH,1280);
     stream1 >> cameraFrame;
     //Gets the resolution of the feed
     cout << "Resolution: " << '\n';
